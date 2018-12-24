@@ -10,6 +10,7 @@ add_library (server STATIC
 	"src/server/Player.cpp"
 	"src/server/Socket.cpp"
 	"src/server/throw.cpp"
+	"src/server/Server.cpp"
 )
 
 target_compile_features(server PUBLIC cxx_std_14)
