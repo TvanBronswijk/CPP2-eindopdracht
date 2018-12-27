@@ -7,30 +7,30 @@
 //=============================================================================
 
 
-#include "server/Socket.hpp"
+#include "server/connection/Socket.hpp"
 #include "server/throw.hpp"
-#include <iostream>
-#include <string>
 #include <cstring>
-#include <stdexcept>
 #include <exception>
+#include <iostream>
 #include <memory>
 #include <sstream>
+#include <stdexcept>
+#include <string>
 #include <system_error>
 
 #if HAVE_POSIX
 
 #include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <net/route.h>
-#include <net/if.h>
 #include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/types.h>
-#include <netdb.h>
-#include <ifaddrs.h>
-#include <unistd.h>
 #include <fcntl.h>
+#include <ifaddrs.h>
+#include <net/if.h>
+#include <net/route.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #else // Windows
 

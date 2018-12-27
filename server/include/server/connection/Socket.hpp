@@ -28,10 +28,10 @@ typedef int SOCKET;
 typedef long ssize_t;
 #endif
 
+#include "CircularBuffer.hpp"
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "CircularBuffer.hpp"
 
 void throw_unless_would_block();
 

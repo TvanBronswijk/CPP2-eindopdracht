@@ -7,9 +7,9 @@ if(MSVC)
 endif(MSVC)
 
 add_library (server STATIC
-	"src/server/Socket.cpp"
-	"src/server/throw.cpp"
+	"src/server/connection/Socket.cpp"
 	"src/server/Server.cpp"
+	"src/server/throw.cpp"
 )
 
 target_compile_features(server PUBLIC cxx_std_17)
