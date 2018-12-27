@@ -1,3 +1,4 @@
+#pragma once
 //
 //  ClientCommand.h
 //  socketexample
@@ -6,9 +7,6 @@
 //  Modified by Jeroen de Haas on 23/11/2016.
 //  Copyright (c) 2016 Avans Hogeschool, 's-Hertogenbosch. All rights reserved.
 //
-
-#ifndef __socketexample__ClientCommand__
-#define __socketexample__ClientCommand__
 
 #include <string>
 #include <memory>
@@ -28,5 +26,3 @@ private:
 	std::string cmd;
 	std::weak_ptr<ClientInfo> info;
 };
-
-#endif /* defined(__socketexample__ClientCommand__) */

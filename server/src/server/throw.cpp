@@ -2,12 +2,12 @@
 // adapted for Windows as well, november 2014
 // copyright © 2002-2014 Bob Polis
 
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <stdexcept>
-#include <system_error>
 #include "server/throw.hpp"
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <system_error>
 
 static std::string combine_message_elements(const char* file, unsigned int line, const char* user_message, const char* sys_message)
 {

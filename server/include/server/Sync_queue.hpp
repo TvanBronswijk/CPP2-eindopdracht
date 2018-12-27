@@ -1,10 +1,8 @@
+#pragma once
 //
 //  Sync_queue.h
 //  adapted from an example from Bjarne Stroustrup
 //
-
-#ifndef __Sync_queue__
-#define __Sync_queue__
 
 #include <mutex>
 #include <condition_variable>
@@ -36,5 +34,3 @@ private:
 	std::condition_variable cond;
 	std::list<T> q;
 };
-
-#endif /* defined(__Sync_queue__) */

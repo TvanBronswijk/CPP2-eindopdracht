@@ -1,16 +1,11 @@
-//
-//  Created by Bob Polis on 16/09/14.
-//  Revised by Jeroen de Haas on 22/11/2016
-//  Copyright (c) 2014 Avans Hogeschool, 's-Hertogenbosch. All rights reserved.
-//
 #include "server/Server.hpp"
-#include <thread>
-#include <iostream>
-#include <exception>
-#include <utility>
+#include "server/ClientInfo.hpp"
+#include "server/Player.hpp"
 #include <chrono>
-#include "server\Player.hpp"
-#include "server\ClientInfo.hpp"
+#include <exception>
+#include <iostream>
+#include <thread>
+#include <utility>
 
 void consume_command(Server& server) // runs in its own thread
 {

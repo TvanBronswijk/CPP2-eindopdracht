@@ -1,3 +1,4 @@
+#pragma once
 #include <memory>
 #include <string>
 #include "server\Sync_queue.hpp"
