@@ -12,7 +12,7 @@ void Server::accept(std::function<void(Socket)> on_connect) {
 		(*this) << ex.what() << '\n';
 	}
 	catch (...) {
-		log("An error has occured. :(\n");
+		log("An error has occured.\n");
 	}
 }
 
@@ -37,7 +37,7 @@ void command_thread(Server& server, CommandHandler handle_command)
 				auto& player = clientInfo->get_player();
 				try {
 					if (!handle_command(server, command)) {
-						client << "\r\n" << player.get_name() << ": " << command.get_cmd() << "\r\n" << server.prompt();
+						client << player.get_name() << ": " << command.get_cmd() << "\r\n" << server.prompt();
 					}
 				}
 				catch (const std::exception& ex) {
@@ -72,7 +72,7 @@ std::shared_ptr<ClientInfo> initialize_client(Server& server, Socket socket) {
 	return std::make_shared<ClientInfo>(std::move(socket), Player{ name });
 }
 
-void client_thread(Server& server, Socket socket, ClientHandler handle_connection)
+void client_thread(Server& server, Socket socket, ClientHandler handle_client_input)
 {
 	try {
 		auto client_info = initialize_client(server, std::move(socket));
@@ -84,7 +84,7 @@ void client_thread(Server& server, Socket socket, ClientHandler handle_connectio
 				std::string cmd;
 				if (client.readline([&cmd](std::string input) { cmd = input; })) {
 					server << '[' << client.get_dotted_ip() << " (" << std::to_string(client.get_socket()) << ") " << player.get_name() << "] " << cmd << "\r\n";
-					handle_connection(server, client_info, cmd);
+					handle_client_input(server, client_info, cmd);
 				};
 
 			}
