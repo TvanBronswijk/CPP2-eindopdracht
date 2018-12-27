@@ -1,4 +1,4 @@
-#include "server\Server.hpp"
+#include "server.hpp"
 
 int main(int argc, const char * argv[])
 {

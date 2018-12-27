@@ -5,10 +5,10 @@ if(MSVC)
 endif()
 
 add_executable (machiavelli
-	"src/machiavelli/main.cpp"
+	"src/main.cpp"
 )
 
-target_compile_features(machiavelli PUBLIC cxx_std_14)
+target_compile_features(machiavelli PUBLIC cxx_std_17)
 target_link_libraries(machiavelli PRIVATE server)
 target_include_directories(machiavelli PRIVATE 
 	"src"

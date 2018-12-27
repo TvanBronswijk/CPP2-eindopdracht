@@ -7,14 +7,12 @@
 #include <iostream>
 #include <stdexcept>
 #include <system_error>
-using namespace std;
-
 #include "server/throw.hpp"
 
-static string combine_message_elements(const char* file, unsigned int line, const char* user_message, const char* sys_message)
+static std::string combine_message_elements(const char* file, unsigned int line, const char* user_message, const char* sys_message)
 {
-    ostringstream msg;
-    string f {file};
+    std::ostringstream msg;
+	std::string f {file};
     msg << sys_message << " (" << f.substr(f.rfind('/') + 1) << ":" << line << ")";
     if (user_message) {
         msg << ", " << user_message;
@@ -25,29 +23,29 @@ static string combine_message_elements(const char* file, unsigned int line, cons
 void __throw_if_min1(int x, const char* file, unsigned int line, const char* message)
 {
     if (x == -1) {
-        error_code ec {errno, system_category()};
-        ostringstream ec_str;
+		std::error_code ec {errno, std::system_category()};
+		std::ostringstream ec_str;
         ec_str << "system error " <<  ec.value() << ": " << ec.message();
-        string msg {combine_message_elements(file, line, message, ec_str.str().c_str())};
-        throw system_error {ec, msg};
+		std::string msg {combine_message_elements(file, line, message, ec_str.str().c_str())};
+        throw std::system_error {ec, msg};
     }
 }
 
 void __throw_if_null(const void* p, const char* file, unsigned int line, const char* message)
 {
     if (p == nullptr) {
-        string msg {combine_message_elements(file, line, message, "null pointer exception")};
-        throw runtime_error {msg};
+		std::string msg {combine_message_elements(file, line, message, "null pointer exception")};
+        throw std::runtime_error {msg};
     }
 }
 
 void __throw_if_err(int err, const char* file, unsigned int line, const char* message)
 {
     if (err != 0) {
-        error_code ec {err, system_category()};
-        ostringstream ec_str;
+		std::error_code ec {err, std::system_category()};
+		std::ostringstream ec_str;
         ec_str << "error " <<  err;
-        string msg {combine_message_elements(file, line, message, ec_str.str().c_str())};
-        throw system_error {ec, msg};
+		std::string msg {combine_message_elements(file, line, message, ec_str.str().c_str())};
+        throw std::system_error {ec, msg};
     }
 }

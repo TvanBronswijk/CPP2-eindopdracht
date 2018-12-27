@@ -7,18 +7,17 @@ if(MSVC)
 endif(MSVC)
 
 add_library (server STATIC
-	"src/server/Player.cpp"
 	"src/server/Socket.cpp"
 	"src/server/throw.cpp"
 	"src/server/Server.cpp"
 )
 
-target_compile_features(server PUBLIC cxx_std_14)
+target_compile_features(server PUBLIC cxx_std_17)
 target_include_directories(server PUBLIC "include")
 target_include_directories(server PRIVATE "src")
 
-install(DIRECTORY include/server
-	DESTINATION include/server
+install(DIRECTORY include
+	DESTINATION include
 	FILES_MATCHING PATTERN "*.hpp"
 )
 install(TARGETS server
