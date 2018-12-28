@@ -2,33 +2,29 @@
 #include "server/command/ClientCommand.hpp"
 #include "server/connection/Socket.hpp"
 #include "server/connection/Sync_queue.hpp"
+#include "server/ServerCallbackHandler.hpp"
 #include <memory>
 #include <string>
-
-class Server;
-using CommandHandler = std::function<bool(Server&, ClientCommand)>;
-using ClientHandler = std::function<void(Server&, std::weak_ptr<ClientInfo> client, std::string input)>;
 
 class Server {
 public:
 	class Builder {
 	public:
-		Builder(CommandHandler handle_command, ClientHandler handle_connection)
-			: _handle_command(handle_command), _handle_connection(handle_connection), _server_name("server"), _prompt("server> "), _port(1080) {}
+		Builder() : _server_name("server"), _prompt("server> "), _port(1080) {}
 		Builder& with_name(std::string name) { _server_name = name; return *this; }
 		Builder& with_prompt(std::string prompt) { _prompt = prompt; return *this; }
 		Builder& at_port(int port) { _port = port; return *this; }
-		std::unique_ptr<Server> build();
+		std::unique_ptr<Server> build(std::unique_ptr<ServerCallbackHandler> handler);
 	private:
-		CommandHandler _handle_command;
-		ClientHandler _handle_connection;
 		std::string _server_name;
 		std::string _prompt;
 		int _port;
 	};
 
-	Server(std::string name, std::string prompt, int port, ClientHandler handle_connection)
-		: _running(true), _socket(port), _server_name(name), _prompt(prompt), _tcp_port(port), _handle_connection(handle_connection) {};
+	Server(std::string name, std::string prompt, int port, std::unique_ptr<ServerCallbackHandler> handler)
+		: _running(true), _socket(port), _server_name(name), _prompt(prompt), _tcp_port(port), _handler(std::move(handler)) {
+		_handler->_server = this;
+	};
 
 	std::string name() { return _server_name; }
 	std::string prompt() { return _prompt; }
@@ -57,15 +53,11 @@ private:
 	ServerSocket _socket;
 	std::vector<std::thread> _threads;
 	Sync_queue<ClientCommand> _queue;
-	ClientHandler _handle_connection;
+	std::unique_ptr<ServerCallbackHandler> _handler;
 
+	friend void command_thread(Server&);
+	friend void client_thread(Server&, Socket);
 	friend void close_server(Server&);
 };
 
-void command_thread(Server&, CommandHandler);
-void client_thread(Server&, Socket, ClientHandler);
-
-Server::Builder create_server(CommandHandler, ClientHandler);
-void close_server(Server&);
-
-
+Server::Builder create_server();

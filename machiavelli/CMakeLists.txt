@@ -6,6 +6,7 @@ endif()
 
 add_executable (machiavelli
 	"src/main.cpp"
+	"src/machiavelli/Game.cpp"
 )
 
 target_compile_features(machiavelli PUBLIC cxx_std_17)

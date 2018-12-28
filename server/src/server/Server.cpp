@@ -17,17 +17,17 @@ void Server::accept(std::function<void(Socket)> on_connect) {
 }
 
 void Server::add_client(Socket socket) {
-	_threads.emplace_back(client_thread, std::ref(*this), std::move(socket), _handle_connection);
+	_threads.emplace_back(client_thread, std::ref(*this), std::move(socket));
 }
 
-std::unique_ptr<Server> Server::Builder::build()
+std::unique_ptr<Server> Server::Builder::build(std::unique_ptr<ServerCallbackHandler> handler)
 {
-	auto server = std::make_unique<Server>(_server_name, _prompt, _port, _handle_connection);
-	server->_threads.emplace_back(command_thread, std::ref(*server), _handle_command);
+	auto server = std::make_unique<Server>(_server_name, _prompt, _port, std::move(handler));
+	server->_threads.emplace_back(command_thread, std::ref(*server));
 	return std::move(server);
 }
 
-void command_thread(Server& server, CommandHandler handle_command)
+void command_thread(Server& server)
 {
 	try {
 		while (server.is_running()) {
@@ -36,7 +36,7 @@ void command_thread(Server& server, CommandHandler handle_command)
 				auto& client = clientInfo->get_socket();
 				auto& player = clientInfo->get_player();
 				try {
-					if (!handle_command(server, command)) {
+					if (!server._handler->on_command(command)) {
 						client << player.get_name() << ": " << command.get_cmd() << "\r\n" << server.prompt();
 					}
 				}
@@ -60,22 +60,10 @@ void command_thread(Server& server, CommandHandler handle_command)
 	}
 }
 
-std::shared_ptr<ClientInfo> initialize_client(Server& server, Socket socket) {
-	socket << "Welcome to " << server.name() << "!\r\nWhat's your name?\r\n" << server.prompt();
-	std::string name;
-	bool done{ false };
-	while (!done) {
-		done = socket.readline([&name](std::string input) {
-			name = input;
-		});
-	}
-	return std::make_shared<ClientInfo>(std::move(socket), Player{ name });
-}
-
-void client_thread(Server& server, Socket socket, ClientHandler handle_client_input)
+void client_thread(Server& server, Socket socket)
 {
 	try {
-		auto client_info = initialize_client(server, std::move(socket));
+		auto client_info = server._handler->on_client_register(std::move(socket));
 		auto& client = client_info->get_socket();
 		auto& player = client_info->get_player();
 		client << "Welcome, " << player.get_name() << ", have fun playing our game!\r\n" << server.prompt();
@@ -84,7 +72,7 @@ void client_thread(Server& server, Socket socket, ClientHandler handle_client_in
 				std::string cmd;
 				if (client.readline([&cmd](std::string input) { cmd = input; })) {
 					server << '[' << client.get_dotted_ip() << " (" << std::to_string(client.get_socket()) << ") " << player.get_name() << "] " << cmd << "\r\n";
-					handle_client_input(server, client_info, cmd);
+					server._handler->on_client_input(client_info, cmd);
 				};
 
 			}
@@ -104,13 +92,12 @@ void client_thread(Server& server, Socket socket, ClientHandler handle_client_in
 	}
 }
 
-Server::Builder create_server(CommandHandler handle_command, ClientHandler handle_connection) {
-	return Server::Builder(handle_command, handle_connection);
-}
-
 void close_server(Server& server) {
 	for (auto &t : server._threads) {
 		t.join();
 	}
 }
 
+Server::Builder create_server() {
+	return Server::Builder();
+}

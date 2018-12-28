@@ -1,34 +1,20 @@
 #define _CRTDBG_MAP_ALLOC  
 #include <stdlib.h>  
 #include <crtdbg.h>  
-#include "server.hpp"
 
-bool consume_command(Server& server, ClientCommand command)
-{
-	return false;
-}
-
-bool handle_client_input(Server& server, std::weak_ptr<ClientInfo> client, std::string input) {
-	if (input == "quit") {
-		return true;
-	}
-	else if (input == "quit_server") {
-		server.stop();
-	}
-	else {
-		server.enqueue_command(ClientCommand{ input, client });
-	}
-}
+#include "machiavelli/Game.hpp"
+#include <server.hpp>
 
 int main(int argc, const char * argv[])
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	auto server = create_server(consume_command, handle_client_input)
+	auto game = std::make_unique<Game>();
+	auto server = create_server()
 		.with_name("Machiavelli")
 		.with_prompt("machiavelli> ")
 		.at_port(1080)
-		.build();
+		.build(std::move(game));
 
 	server->accept([&server](Socket sock) {
 		(*server) << "A new connection from " << sock.get_dotted_ip() << " has been established.\n";
