@@ -8,6 +8,66 @@
 
 using namespace validate;
 Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsing::make_buildings()) {
+	_characterfunctions = {
+		{1, [](Game& game, std::weak_ptr<ClientInfo> client) {
+			if (auto clientinfo = client.lock()) {
+				auto& sock = clientinfo->get_socket();
+				auto& player = clientinfo->get_player();
+				auto& data = player.get_data<MachiavelliData>();
+			}
+		}},
+		{2, [](Game& game, std::weak_ptr<ClientInfo> client) {
+			if (auto clientinfo = client.lock()) {
+				auto& sock = clientinfo->get_socket();
+				auto& player = clientinfo->get_player();
+				auto& data = player.get_data<MachiavelliData>();
+			}
+		}},
+		{3, [](Game& game, std::weak_ptr<ClientInfo> client) {
+			if (auto clientinfo = client.lock()) {
+				auto& sock = clientinfo->get_socket();
+				auto& player = clientinfo->get_player();
+				auto& data = player.get_data<MachiavelliData>();
+			}
+		}},
+		{4, [](Game& game, std::weak_ptr<ClientInfo> client) {
+			if (auto clientinfo = client.lock()) {
+				auto& sock = clientinfo->get_socket();
+				auto& player = clientinfo->get_player();
+				auto& data = player.get_data<MachiavelliData>();
+			}
+		}},
+		{5, [](Game& game, std::weak_ptr<ClientInfo> client) {
+			if (auto clientinfo = client.lock()) {
+				auto& sock = clientinfo->get_socket();
+				auto& player = clientinfo->get_player();
+				auto& data = player.get_data<MachiavelliData>();
+			}
+		}},
+		{6, [](Game& game, std::weak_ptr<ClientInfo> client) {
+			if (auto clientinfo = client.lock()) {
+				auto& sock = clientinfo->get_socket();
+				auto& player = clientinfo->get_player();
+				auto& data = player.get_data<MachiavelliData>();
+				data.gold_coins += 1;
+			}
+		}},
+		{7, [](Game& game, std::weak_ptr<ClientInfo> client) {
+			if (auto clientinfo = client.lock()) {
+				auto& sock = clientinfo->get_socket();
+				auto& player = clientinfo->get_player();
+				auto& data = player.get_data<MachiavelliData>();
+			}
+		}},
+		{8, [](Game& game, std::weak_ptr<ClientInfo> client) {
+			if (auto clientinfo = client.lock()) {
+				auto& sock = clientinfo->get_socket();
+				auto& player = clientinfo->get_player();
+				auto& data = player.get_data<MachiavelliData>();
+			}
+		}}
+	};
+	
 	_commands =
 	{
 		{
@@ -47,7 +107,7 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 			"!use_card",
 			{"Use one of your special cards.",
 			[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
-			[&](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
+			[this](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
 				if (auto clientinfo = client.lock()) {
 					auto& sock = clientinfo->get_socket();
 					auto& player = clientinfo->get_player();
@@ -57,7 +117,8 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 					std::vector<CharacterCard*> my_characters{};
 					std::transform(data.character_cards.begin(), data.character_cards.end(), std::back_inserter(my_characters), 
 						[](auto& pair) { return &pair.second; });
-					data.character_card_options = { my_characters, [](CharacterCard& character) { /* TODO do something when chosen */ }};
+					data.character_card_options = { my_characters, [this, &client](CharacterCard& character) { this->_characterfunctions.at(character.get_number())(*this, client); } };
+					sock << "Choose one:" << "\r\n";
 					for (int i = 0; i < my_characters.size(); i++) {
 						sock << "[" << std::to_string(i) << "] " << my_characters[i]->get_name() << "\r\n";
 					}

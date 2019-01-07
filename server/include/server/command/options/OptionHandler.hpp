@@ -7,8 +7,8 @@ public:
 	OptionHandler() = default;
 	OptionHandler(std::vector<T*> vect, std::function<void(T&)> function) : options(vect), func_(function) {}
 	void choose(size_t choice) {
-		auto option = options.find(choice);
-		if (option != options.end())
+		auto option = options.at(choice);
+		if (option)
 			func_(*option);
 		throw; //TODO throw exception
 	}

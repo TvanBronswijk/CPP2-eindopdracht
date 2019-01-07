@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 class Game : public ServerCallbackHandler {
+	using CharacterFunction = std::function<void(Game&, std::weak_ptr<ClientInfo>)>;
 public:
 	Game();
 	bool on_command(ClientCommand) override;
@@ -16,6 +17,7 @@ public:
 private:
 	std::unordered_map<std::string, ServerCommand<Game&, std::weak_ptr<ClientInfo>>> _commands;
 	std::unordered_map<int, CharacterCard> charactercards_;
+	std::unordered_map<int, CharacterFunction> _characterfunctions;
 	std::vector<BuildingCard> buildingcards_;
 
 	void next_turn(std::weak_ptr<ClientInfo> client);
