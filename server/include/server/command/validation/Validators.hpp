@@ -22,4 +22,25 @@ namespace validate {
 	bool is_empty(std::vector<T> vector) {
 		return vector.empty();
 	}
+
+	inline bool is_single_digit(std::string str) {
+		try {
+			auto digit = std::stoi(str);
+			return digit < 10 && digit >= 0;
+		}
+		catch(...){
+			return false;
+		}
+	}
+
+	inline std::function<bool(std::string)> is_between(int min, int max) {
+		return [=](std::string str) {try 
+		{
+			auto digit = std::stoi(str);
+			return digit < max && digit >= min;
+		}
+		catch (...) {
+			return false;
+		}};
+	}
 }
