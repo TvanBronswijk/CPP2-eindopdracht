@@ -10,7 +10,7 @@ enum class Player_state {Waiting, Playing, Collecting};
 
 struct MachiavelliData : public PlayerData {
 	enum class PlayerOptions { Character, Building, None };
-	MachiavelliData() : gold_coins(0), player_state(Player_state::Waiting), in_option(PlayerOptions::None), drop_card(false), take_card(false) {};
+	MachiavelliData() : gold_coins(2), player_state(Player_state::Waiting), in_option(PlayerOptions::None), drop_card(false), take_card(false) {};
 	
 	Player_state player_state;
 	int gold_coins;

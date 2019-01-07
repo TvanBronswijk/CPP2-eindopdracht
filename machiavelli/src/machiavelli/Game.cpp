@@ -8,7 +8,7 @@
 #include <iterator>
 
 using namespace validate;
-Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsing::make_buildings()) {
+Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsing::make_buildings()), players_turn(1), characters_turn(1), king(1) {
 	_characterfunctions = {
 		{1, [](Game& game, std::weak_ptr<ClientInfo> client) {
 			if (auto clientinfo = client.lock()) {
@@ -144,7 +144,7 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 		{
 			"!build",
 			{"Build a building from your hand. [ARG1: Card Number In Hand]",
-			[&](StringArgs args) { return validate_that<std::string>(args[0], ); },
+			[&](StringArgs args) { return validate_that<std::string>(args[0], is_single_digit); },
 			[this](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
 				if (auto clientinfo = client.lock()) {
 					auto& sock = clientinfo->get_socket();
@@ -155,7 +155,7 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 					if (chosen_card.get_coins() < data.gold_coins) {
 						data.gold_coins -= chosen_card.get_coins();
 						data.build_buildings.push_back(chosen_card);
-						data.building_cards.erase(std::remove(data.building_cards.begin(), data.building_cards.end(), chosen_card), data.building_cards.end());
+						//data.building_cards.erase(std::remove(data.building_cards.begin(), data.building_cards.end(), chosen_card), data.building_cards.end());
 					}
 				}
 			}}
@@ -219,7 +219,16 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 					}
 				}
 			}}
-		}
+		},
+			{
+				"!finish",
+				{ "finish a turn",
+				[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
+				[this](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
+					auto player = this->get_next_player();
+					this->next_turn(player);
+				} }
+			}
 	};
 }
 
@@ -243,30 +252,81 @@ std::weak_ptr<ClientInfo> Game::get_next_player() {
 
 
 void Game::next_turn(std::weak_ptr<ClientInfo> client){
-	auto characters_turn_ = characters_turn;
-	if (auto clientInfo = client.lock()) {
-		auto& socket = clientInfo->get_socket();
-		socket << "Your turn is over";
-		auto& player_data = clientInfo->get_player().get_data<MachiavelliData>();
-		player_data.player_state = Player_state::Waiting;
+	if (characters_turn != 9) {
+		bool found = false;
+		auto characters_turn_ = characters_turn;
+		if (auto clientInfo = client.lock()) {
+			auto& socket = clientInfo->get_socket();
+			socket << "Your turn is over\r\n";
+			auto& player_data = clientInfo->get_player().get_data<MachiavelliData>();
+			player_data.player_state = Player_state::Waiting;
 
-		auto clients = _server->get_clients();
-		while (characters_turn < 9) {
-			std::for_each(clients.begin(), clients.end(), [characters_turn_](std::weak_ptr<ClientInfo> clientinfo)
-			{
-				if (auto clientInfo = clientinfo.lock()) {
-					auto& client_character_cards = clientInfo->get_player().get_data<MachiavelliData>().character_cards;
-					if (client_character_cards.find((characters_turn_)) != client_character_cards.end()) {
-						auto& socket = clientInfo->get_socket();
-						auto& player_data = clientInfo->get_player().get_data<MachiavelliData>();
-						socket << "It is your turn!";
-						player_data.player_state = Player_state::Playing;
-						return;
+			auto clients = _server->get_clients();
+			while (!found) {
+				std::for_each(clients.begin(), clients.end(), [&characters_turn_, &found, this](std::weak_ptr<ClientInfo> clientinfo)
+				{
+					if (auto clientInfo = clientinfo.lock()) {
+						auto& client_character_cards = clientInfo->get_player().get_data<MachiavelliData>().character_cards;
+						if (client_character_cards.find((characters_turn_)) != client_character_cards.end()) {
+							auto& socket = clientInfo->get_socket();
+							auto& player_data = clientInfo->get_player().get_data<MachiavelliData>();
+							socket << "It is your turn!\r\n" << _server->prompt();
+							player_data.player_state = Player_state::Playing;
+							found = true;
+						}
 					}
-				}
-			});
-			characters_turn++;
+				});
+				characters_turn++;
+			}
 		}
+	}
+	else {
+		if (!check_for_eight_buildings()) {
+			calculate_highscore();
+		}
+		else {
+			prepare_round();
+			get_next_player();
+
+		}
+	}
+}
+void Game::calculate_highscore() {
+	auto clients = _server->get_clients();
+	int score_player1;
+	int score_player2;
+
+	int player = 1;
+	std::for_each(clients.begin(), clients.end(), [&score_player1,&score_player2](std::weak_ptr<ClientInfo> clientinfo)
+	{
+		if (auto clientInfo = clientinfo.lock()) {
+
+		}
+	});
+}
+
+void Game::prepare_round() {
+	players_turn = king++;
+	charactercards_ = parsing::make_characters();
+}
+
+bool Game::check_for_eight_buildings() {
+	int buildings = 0;
+	auto clients = _server->get_clients();
+
+	std::for_each(clients.begin(), clients.end(), [&buildings](std::weak_ptr<ClientInfo> clientinfo)
+	{
+		if (auto clientInfo = clientinfo.lock()) {
+			auto amount_of_buildings = clientInfo->get_player().get_data<MachiavelliData>().build_buildings.size();
+			if (amount_of_buildings > buildings) buildings = amount_of_buildings;
+		}
+	});
+
+	if (buildings >= 8) {
+		return true;
+	}
+	else {
+		return false;
 	}
 }
 

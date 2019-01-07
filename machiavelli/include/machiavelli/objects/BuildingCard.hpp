@@ -15,6 +15,8 @@ public:
 	int get_coins() { return gold_coins_; }
 	friend std::istream& operator>>(std::istream& str, BuildingCard& building);
 	friend std::ostream& operator<<(std::ostream& str, BuildingCard& building);
+
+	bool operator==(BuildingCard& card) { return card.name_ == this->name_; }
 };
 
 

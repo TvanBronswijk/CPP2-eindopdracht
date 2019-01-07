@@ -24,7 +24,11 @@ private:
 	std::unordered_map<std::string, ServerCommand<Game&, std::weak_ptr<ClientInfo>>> _commands;
 	std::unordered_map<int, CharacterFunction> _characterfunctions;
 	std::vector<BuildingCard> buildingcards_;
+	bool check_for_eight_buildings();
 
+	void calculate_highscore();
+	void prepare_round();
 	int characters_turn;
 	int players_turn;
+	int king;
 };
