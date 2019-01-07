@@ -10,6 +10,9 @@ private:
 	std::string color_;
 	int gold_coins_;
 public:
+	std::string get_name() { return name_; }
+	std::string get_color() { return color_; }
+	int get_coins() { return gold_coins_; }
 	friend std::istream& operator>>(std::istream& str, BuildingCard& building);
 	friend std::ostream& operator<<(std::ostream& str, BuildingCard& building);
 };

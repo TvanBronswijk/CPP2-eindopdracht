@@ -124,6 +124,40 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 					}
 				}
 			}}
+		},
+		{
+			"!hand",
+			{"Show your hand",
+			[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
+			[this](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
+				if (auto clientinfo = client.lock()) {
+					auto& sock = clientinfo->get_socket();
+					auto& player = clientinfo->get_player();
+					auto& data = player.get_data<MachiavelliData>();
+					for (int i = 0; i < data.building_cards.size(); i++) {
+						sock << "[" << i << "] " << data.building_cards[i].get_name() << "\r\n";
+					}
+				}
+			}}
+		},
+		{
+			"!build",
+			{"Build a building from your hand. [ARG1: Card Number In Hand]",
+			[&](StringArgs args) { return validate_that<std::string>(args[0], ); },
+			[this](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
+				if (auto clientinfo = client.lock()) {
+					auto& sock = clientinfo->get_socket();
+					auto& player = clientinfo->get_player();
+					auto& data = player.get_data<MachiavelliData>();
+					
+					auto& chosen_card = data.building_cards[std::stoi(args[0])];
+					if (chosen_card.get_coins() < data.gold_coins) {
+						data.gold_coins -= chosen_card.get_coins();
+						data.build_buildings.push_back(chosen_card);
+						data.building_cards.erase(std::remove(data.building_cards.begin(), data.building_cards.end(), chosen_card), data.building_cards.end());
+					}
+				}
+			}}
 		}
 	};
 }
