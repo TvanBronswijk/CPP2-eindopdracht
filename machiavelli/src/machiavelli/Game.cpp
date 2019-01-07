@@ -1,7 +1,6 @@
 #include "machiavelli/Game.hpp"
 #include "machiavelli/MachiavelliData.hpp"
 #include "server/Server.hpp"
-#include <iostream>
 #include <string>
 #include <sstream>
 #include <algorithm>
@@ -13,7 +12,7 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 	{
 		{
 			"!hello_world",
-			{"Hello", 
+			{"Hello World!", 
 			[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); }, 
 			[&](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
 				auto& sock = client.lock()->get_socket();
@@ -21,11 +20,19 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 			}}
 		},
 		{
-			"!finish",
-			{"Finish Turn",
+			"!take_gold",
+			{"Get Gold at Start of Turn",
 			[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
 			[&](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
-				game.next_turn(client);
+
+			}}
+		},
+		{
+			"!draw_cards",
+			{"Get Cards at Start of Turn",
+			[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
+			[&](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
+
 			}}
 		}
 	};
@@ -62,7 +69,7 @@ bool Game::on_command(ClientCommand com) {
 }
 
 std::shared_ptr<ClientInfo> Game::on_client_register(Socket sock) const {
-	sock << "Welcome to " << _server->name() << "! To exit, type '!quit'.\r\nWhat's your name?\r\n" << _server->prompt();
+	sock << "Welcome to " << _server->name() << "! To exit, type '!quit'. To see all commands, type '!help'.\r\nWhat's your name?\r\n" << _server->prompt();
 	std::string name;
 	while (!sock.readline([&name](std::string input) { name = input; }));
 	return std::make_shared<ClientInfo>(std::move(sock), Player{ name, std::make_unique<MachiavelliData>() });
@@ -74,6 +81,11 @@ ServerCallbackHandler::Event Game::on_client_input(std::weak_ptr<ClientInfo> cli
 	}
 	else if (input == "___quit_server") {
 		return Event::server_stop;
+	}
+	else if (input == "!help") {
+		auto& sock = client.lock()->get_socket();
+		std::for_each(_commands.begin(), _commands.end(), [&](auto pair) { sock << pair.first << " - " << pair.second.get_description() << "\r\n"; });
+		sock << _server->prompt();
 	}
 	else {
 		_server->enqueue_command(ClientCommand{ input, client });
