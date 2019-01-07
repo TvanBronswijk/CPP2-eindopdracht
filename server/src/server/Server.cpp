@@ -56,7 +56,7 @@ void command_thread(Server& server)
 		}
 	}
 	catch (...) {
-		server << "consume_command crashed :(\n";
+		server << "The command thread crashed.\n";
 	}
 }
 
@@ -66,15 +66,27 @@ void client_thread(Server& server, Socket socket)
 		auto client_info = server._handler->on_client_register(std::move(socket));
 		auto& client = client_info->get_socket();
 		auto& player = client_info->get_player();
-		client << "Welcome, " << player.get_name() << ", have fun playing our game!\r\n" << server.prompt();
 		while (server.is_running()) {
 			try {
 				std::string cmd;
 				if (client.readline([&cmd](std::string input) { cmd = input; })) {
 					server << '[' << client.get_dotted_ip() << " (" << std::to_string(client.get_socket()) << ") " << player.get_name() << "] " << cmd << "\r\n";
-					server._handler->on_client_input(client_info, cmd);
+					
+					bool quit = false;
+					switch (server._handler->on_client_input(client_info, cmd)) {
+					case ServerCallbackHandler::Event::quit:
+						quit = true;
+						break;
+					case ServerCallbackHandler::Event::server_stop:
+						server.stop();
+						break;
+					default:
+						break;
+					}
+					if (quit) {
+						break;
+					}
 				};
-
 			}
 			catch (const std::exception& ex) {
 				client << "ERROR: " << ex.what() << "\r\n";
@@ -85,10 +97,10 @@ void client_thread(Server& server, Socket socket)
 		}
 	}
 	catch (std::exception &ex) {
-		server << "handle_client " << ex.what() << "\n";
+		server << "Client thread exception: " << ex.what() << "\n";
 	}
 	catch (...) {
-		server << "handle_client crashed\n";
+		server << "The client thread crashed.\n";
 	}
 }
 
