@@ -24,7 +24,7 @@ void Parser::make_characters() {
 
 	}
 }
-
+//TODO::end line in for_each loop not in object
 void Parser::save_characters(std::vector<BuildingCard> buildingcards){
 	std::ofstream file;
 
