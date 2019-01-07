@@ -20,6 +20,10 @@ void Server::add_client(Socket socket) {
 	_threads.emplace_back(client_thread, std::ref(*this), std::move(socket));
 }
 
+void Server::announce(std::string message) {
+	std::for_each(_clients.begin(), _clients.end(), [this, message](std::weak_ptr<ClientInfo> client) { if (auto clientinfo = client.lock()) clientinfo->get_socket() << "\r\n" << message << this->prompt(); });
+}
+
 std::unique_ptr<Server> Server::Builder::build(std::unique_ptr<ServerCallbackHandler> handler)
 {
 	auto server = std::make_unique<Server>(_server_name, _prompt, _port, std::move(handler));
@@ -40,7 +44,7 @@ void command_thread(Server& server)
 						client << server.prompt();
 					}
 					else {
-						client << player.get_name() << ": " << command.get_cmd() << "\r\n" << server.prompt();
+						server.announce(player.get_name() + ": " + command.get_cmd() + "\r\n");
 					}
 				}
 				catch (const std::exception& ex) {
@@ -67,6 +71,7 @@ void client_thread(Server& server, Socket socket)
 {
 	try {
 		auto client_info = server._handler->on_client_register(std::move(socket));
+		server._clients.push_back(client_info);
 		auto& client = client_info->get_socket();
 		auto& player = client_info->get_player();
 
@@ -74,7 +79,7 @@ void client_thread(Server& server, Socket socket)
 		while (server.is_running()) {
 			try {
 				std::string cmd;
-				if (client.readline([&cmd](std::string input) { cmd = input; })) {
+				if (client.readline([&cmd](std::string input) { cmd = input; }) && !cmd.empty()) {
 					server << '[' << client.get_dotted_ip() << " (" << std::to_string(client.get_socket()) << ") " << player.get_name() << "] " << cmd << "\r\n";
 					
 					bool quit = false;

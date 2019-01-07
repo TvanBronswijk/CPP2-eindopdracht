@@ -40,6 +40,8 @@ public:
 	void enqueue_command(ClientCommand command) { _queue.put(command); }
 	ClientCommand dequeue_command() { return ClientCommand{ _queue.get() }; }
 
+	void announce(std::string str);
+
 	void log(char character) { std::cerr << character; }
 	void log(std::string message) { std::cerr << message; }
 	Server& operator << (char character) { log(character); return *this; }
@@ -52,6 +54,7 @@ private:
 	bool _running;
 	ServerSocket _socket;
 	std::vector<std::thread> _threads;
+	std::vector<std::weak_ptr<ClientInfo>> _clients;
 	Sync_queue<ClientCommand> _queue;
 	std::unique_ptr<ServerCallbackHandler> _handler;
 

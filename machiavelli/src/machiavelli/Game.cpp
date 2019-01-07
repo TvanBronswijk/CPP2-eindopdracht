@@ -13,12 +13,12 @@ Game::Game() {
 	{
 		{
 			"!hello",
-			{"Hello", [&](StringArgs args) {
-		return validate_that<StringArgs>(args, is_empty<std::string>);
-	}, [&](validate::StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
-		auto& sock = client.lock()->get_socket();
-		sock << "Hello to you too." << "\r\n";
-	}}
+			{"Hello", 
+			[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); }, 
+			[&](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
+				auto& sock = client.lock()->get_socket();
+				sock << "Hello to you too." << "\r\n";
+			}}
 		}
 	};
 }
