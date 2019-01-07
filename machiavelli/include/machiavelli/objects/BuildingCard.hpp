@@ -24,7 +24,7 @@ inline std::istream& operator>>(std::istream& str, BuildingCard& building)
 	std::string         cell;
 
 	int number = 0;
-	while (std::getline(lineStream, cell, ','))
+	while (std::getline(lineStream, cell, ';'))
 	{
 		switch (number) {
 		case 0:

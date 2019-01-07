@@ -32,12 +32,12 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 }
 
 void Game::next_turn(std::weak_ptr<ClientInfo> client) {
-	//if (auto clientInfo = client.lock()) {
-	//	auto& client = clientInfo->get_socket();
-	//	auto& player_data = clientInfo->get_player().get_data<MachiavelliData>();
-	//	player_data.player_state = Player_state::Waiting;
+	if (auto clientInfo = client.lock()) {
+		auto& client = clientInfo->get_socket();
+		auto& player_data = clientInfo->get_player().get_data<MachiavelliData>();
+		player_data.player_state = Player_state::Waiting;
 
-	//}
+	}
 }
 
 bool Game::on_command(ClientCommand com) {

@@ -11,6 +11,9 @@ private:
 public:
 	friend std::istream& operator>>(std::istream& str, CharacterCard& charactercard);
 	friend std::ostream& operator<<(std::ostream& str, CharacterCard& charactercard);
+
+	int get_number() { return number_; }
+	std::string get_name() { return name_; }
 };
 
 
@@ -23,7 +26,7 @@ inline std::istream& operator>>(std::istream& str, CharacterCard& character)
 	std::string         cell;
 
 	int number = 0;
-	while (std::getline(lineStream, cell, ','))
+	while (std::getline(lineStream, cell, ';'))
 	{
 		switch (number) {
 		case 0:

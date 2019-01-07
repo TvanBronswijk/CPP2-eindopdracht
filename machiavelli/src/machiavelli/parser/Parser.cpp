@@ -20,17 +20,15 @@ namespace parsing {
 	}
 
 	std::unordered_map<int, CharacterCard> make_characters() {
-		std::unordered_map<int, CharacterCard> charactercards;
+		std::unordered_map<int, CharacterCard> charactercards{};
 
 		std::ifstream file;
 
 		file.open("layouts/karakterkaarten.csv");
-		CharacterCard character;
-		int rank = 0;
+		CharacterCard character{};
 		while (file >> character)
 		{
-			charactercards.at(rank) = character;
-			rank++;
+			charactercards[character.get_number()] = character;
 		}
 		return charactercards;
 	}

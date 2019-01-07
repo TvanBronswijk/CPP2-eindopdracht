@@ -23,7 +23,7 @@ public:
 	template<class T>
 	T& get_data() {
 		static_assert(std::is_convertible<T*, PlayerData*>::value, "T must be a concrete implementation of PlayerData");
-		return *(static_cast<T*>(_data));
+		return *(static_cast<T*>(_data.get()));
 	}
 private:
 	std::string name;
