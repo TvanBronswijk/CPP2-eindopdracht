@@ -8,11 +8,11 @@
 #include <iterator>
 
 using namespace validate;
-Game::Game() : charactercards_(parser_.make_characters()), buildingcards_(parser_.make_buildings()) {
+Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsing::make_buildings()) {
 	_commands =
 	{
 		{
-			"!hello",
+			"!hello_world",
 			{"Hello", 
 			[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); }, 
 			[&](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
