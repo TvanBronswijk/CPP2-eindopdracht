@@ -18,4 +18,6 @@ private:
 	std::map<int, CharacterCard> charactercards_;
 	std::vector<BuildingCard> buildingcards_;
 	Parser parser_;
+
+	void next_turn(std::weak_ptr<ClientInfo> client);
 };

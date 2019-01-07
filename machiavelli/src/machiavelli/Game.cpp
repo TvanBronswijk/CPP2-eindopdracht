@@ -19,8 +19,25 @@ Game::Game() : charactercards_(parser_.make_characters()), buildingcards_(parser
 				auto& sock = client.lock()->get_socket();
 				sock << "Hello to you too." << "\r\n";
 			}}
+		},
+		{
+			"!finish",
+			{"Finish Turn",
+			[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
+			[&](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
+				game.next_turn(client);
+			}}
 		}
 	};
+}
+
+void Game::next_turn(std::weak_ptr<ClientInfo> client) {
+	//if (auto clientInfo = client.lock()) {
+	//	auto& client = clientInfo->get_socket();
+	//	auto& player_data = clientInfo->get_player().get_data<MachiavelliData>();
+	//	player_data.player_state = Player_state::Waiting;
+
+	//}
 }
 
 bool Game::on_command(ClientCommand com) {

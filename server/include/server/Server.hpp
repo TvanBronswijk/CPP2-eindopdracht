@@ -42,6 +42,8 @@ public:
 
 	void announce(std::string str);
 
+	std::vector<std::weak_ptr<ClientInfo>> get_clients() { return _clients; }
+
 	void log(char character) { std::cerr << character; }
 	void log(std::string message) { std::cerr << message; }
 	Server& operator << (char character) { log(character); return *this; }
