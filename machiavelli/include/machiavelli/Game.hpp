@@ -1,6 +1,10 @@
 #pragma once
 #include <server\ServerCallbackHandler.hpp>
 #include <server\command\ServerCommand.hpp>
+#include "machiavelli/objects/CharacterCard.hpp"
+#include "machiavelli/objects/BuildingCard.hpp"
+#include "machiavelli/parser/Parser.hpp"
+#include <map>
 
 class Game : public ServerCallbackHandler {
 public:
@@ -11,4 +15,7 @@ public:
 
 private:
 	std::unordered_map<std::string, ServerCommand<Game&, std::weak_ptr<ClientInfo>>> _commands;
+	std::map<int, CharacterCard> charactercards_;
+	std::vector<BuildingCard> buildingcards_;
+	Parser parser_;
 };

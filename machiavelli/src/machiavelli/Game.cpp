@@ -8,7 +8,7 @@
 #include <iterator>
 
 using namespace validate;
-Game::Game() {
+Game::Game() : charactercards_(parser_.make_characters()), buildingcards_(parser_.make_buildings()) {
 	_commands =
 	{
 		{

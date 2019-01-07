@@ -4,25 +4,34 @@
 #include <sstream>
 #include <iostream>
 
-void Parser::make_buildings() {
+std::vector<BuildingCard> Parser::make_buildings() {
+	std::vector<BuildingCard> buildingcards;
+
 	std::ifstream file;
 
 	file.open("layouts/Bouwkaarten.csv");
 	BuildingCard building;
 	while (file >> building)
 	{
+		buildingcards.emplace_back(building);
 	}
+	return buildingcards;
 }
 
-void Parser::make_characters() {
+std::map<int,CharacterCard> Parser::make_characters() {
+	std::map<int, CharacterCard> charactercards;
+
 	std::ifstream file;
 
 	file.open("layouts/karakterkaarten.csv");
 	CharacterCard character;
+	int rank = 0;
 	while (file >> character)
 	{
-
+		charactercards.at(rank) = character;
+		rank++;
 	}
+	return charactercards;
 }
 //TODO::end line in for_each loop not in object
 void Parser::save_characters(std::vector<BuildingCard> buildingcards){
