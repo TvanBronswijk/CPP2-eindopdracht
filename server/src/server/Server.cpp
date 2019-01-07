@@ -36,7 +36,10 @@ void command_thread(Server& server)
 				auto& client = clientInfo->get_socket();
 				auto& player = clientInfo->get_player();
 				try {
-					if (!server._handler->on_command(command)) {
+					if (server._handler->on_command(command)) {
+						client << server.prompt();
+					}
+					else {
 						client << player.get_name() << ": " << command.get_cmd() << "\r\n" << server.prompt();
 					}
 				}
@@ -66,6 +69,8 @@ void client_thread(Server& server, Socket socket)
 		auto client_info = server._handler->on_client_register(std::move(socket));
 		auto& client = client_info->get_socket();
 		auto& player = client_info->get_player();
+
+		client << server.prompt();
 		while (server.is_running()) {
 			try {
 				std::string cmd;
