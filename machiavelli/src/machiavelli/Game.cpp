@@ -12,27 +12,56 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 	{
 		{
 			"!hello_world",
-			{"Hello World!", 
-			[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); }, 
+			{"Hello World!",
+			[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
 			[&](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
-				auto& sock = client.lock()->get_socket();
-				sock << "Hello to you too." << "\r\n";
+				if (auto clientinfo = client.lock()) {
+					auto& sock = clientinfo->get_socket();
+					sock << "Hello to you too." << "\r\n";
+				}
 			}}
 		},
 		{
 			"!take_gold",
-			{"Get Gold at Start of Turn",
+			{"Get Gold at Start of Turn [No Arguments]",
 			[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
 			[&](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
-
+				if (auto clientinfo = client.lock()) {
+					auto& sock = clientinfo->get_socket();
+					auto& player = clientinfo->get_player();
+					auto& data = player.get_data<MachiavelliData>();
+					data.gold_coins += 2;
+					sock << "recieved 2 gold." << "\r\n";
+				}
 			}}
 		},
 		{
 			"!draw_cards",
-			{"Get Cards at Start of Turn",
+			{"Get Cards at Start of Turn [No Arguments]",
 			[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
 			[&](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
+				client.lock()->get_socket() << "not yet implemented";
+			}}
+		},
+		{
+			"!use_card",
+			{"Use one of your special cards.",
+			[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
+			[&](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
+				if (auto clientinfo = client.lock()) {
+					auto& sock = clientinfo->get_socket();
+					auto& player = clientinfo->get_player();
+					auto& data = player.get_data<MachiavelliData>();
+					data.in_option = MachiavelliData::PlayerOptions::Character;
 
+					std::vector<CharacterCard*> my_characters{};
+					std::transform(data.character_cards.begin(), data.character_cards.end(), std::back_inserter(my_characters), 
+						[](auto& pair) { return &pair.second; });
+					data.character_card_options = { my_characters, [](CharacterCard& character) { /* TODO do something when chosen */ }};
+					for (int i = 0; i < my_characters.size(); i++) {
+						sock << "[" << std::to_string(i) << "] " << my_characters[i]->get_name() << "\r\n";
+					}
+				}
 			}}
 		}
 	};
@@ -48,23 +77,47 @@ void Game::next_turn(std::weak_ptr<ClientInfo> client) {
 }
 
 bool Game::on_command(ClientCommand com) {
-	
-	std::istringstream iss(com.get_cmd());
-	std::vector<std::string> words{ std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{} };
-	auto it = _commands.find(words[0]);
-	if (it != _commands.end()) {
-		try {
-			std::vector<std::string> args(words.begin() + 1, words.end());
-			(*it).second.try_action(args, *this, com.get_client_info());
-			return true;
+	if (auto clientinfo = com.get_client_info().lock()) {
+		auto& sock = clientinfo->get_socket();
+		auto& player = clientinfo->get_player();
+		auto& data = player.get_data<MachiavelliData>();
+
+		if (data.in_option == MachiavelliData::PlayerOptions::None) {
+			std::istringstream iss(com.get_cmd());
+			std::vector<std::string> words{ std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{} };
+			auto it = _commands.find(words[0]);
+			if (it != _commands.end()) {
+				try {
+					std::vector<std::string> args(words.begin() + 1, words.end());
+					(*it).second.try_action(args, *this, clientinfo);
+					return true;
+				}
+				catch (std::exception e) {
+					sock << e.what() << "\r\n";
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
 		}
-		catch (std::exception e) {
-			com.get_client_info().lock()->get_socket() << e.what() << "\r\n";
-			return false;
+		else {
+			try {
+				int i = std::stoi(com.get_cmd());
+				if (data.in_option == MachiavelliData::PlayerOptions::Character) {
+					data.character_card_options.choose(i);
+					data.in_option = MachiavelliData::PlayerOptions::None;
+				}
+				if (data.in_option == MachiavelliData::PlayerOptions::Building) {
+					data.building_card_options.choose(i);
+					data.in_option = MachiavelliData::PlayerOptions::None;
+				}
+			}
+			catch (...) {
+				sock << "invalid option." << "\r\n";
+			}
+
 		}
-	}
-	else {
-		return false;
 	}
 }
 
@@ -86,6 +139,7 @@ ServerCallbackHandler::Event Game::on_client_input(std::weak_ptr<ClientInfo> cli
 		auto& sock = client.lock()->get_socket();
 		std::for_each(_commands.begin(), _commands.end(), [&](auto pair) { sock << pair.first << " - " << pair.second.get_description() << "\r\n"; });
 		sock << _server->prompt();
+		return Event::text;
 	}
 	else {
 		_server->enqueue_command(ClientCommand{ input, client });
