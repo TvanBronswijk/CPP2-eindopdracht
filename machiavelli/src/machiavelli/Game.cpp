@@ -13,14 +13,15 @@ std::shared_ptr<ClientInfo> Game::on_client_register(Socket sock) const {
 	return std::make_shared<ClientInfo>(std::move(sock), Player{ name, std::make_unique<MachiavelliData>() });
 }
 
-void Game::on_client_input(std::weak_ptr<ClientInfo> client, std::string input) const {
+ServerCallbackHandler::Event Game::on_client_input(std::weak_ptr<ClientInfo> client, std::string input) const {
 	if (input == "quit") {
-		return;
+		return Event::quit;
 	}
 	else if (input == "quit_server") {
-		_server->stop();
+		return Event::server_stop;
 	}
 	else {
 		_server->enqueue_command(ClientCommand{ input, client });
+		return Event::command;
 	}
 }
