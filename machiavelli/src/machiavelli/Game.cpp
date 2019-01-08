@@ -9,61 +9,74 @@
 using namespace validate;
 Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsing::make_buildings()) {
 	_characterfunctions = {
-		{1, [](Game& game, std::weak_ptr<ClientInfo> client) {
+		{1, [](Game& game, std::weak_ptr<ClientInfo> client) { //moordenaar
+			if (auto clientinfo = client.lock()) {
+				auto& sock = clientinfo->get_socket();
+				auto& player = clientinfo->get_player();
+				auto& data = player.get_data<MachiavelliData>();
+				
+				data.in_option = MachiavelliData::PlayerOptions::Character;
+				std::vector<CharacterCard*> characters{};
+				std::transform(game.charactercards_.begin(), game.charactercards_.end(), std::back_inserter(characters),
+					[](auto& pair) { return &pair.second; });
+				sock << "Choose one:" << "\r\n";
+				for (int i = 0; i < my_characters.size(); i++) {
+					sock << "[" << std::to_string(i) << "] " << my_characters[i]->get_name() << "\r\n";
+				}
+			}
+		}},
+		{2, [](Game& game, std::weak_ptr<ClientInfo> client) { //dief
 			if (auto clientinfo = client.lock()) {
 				auto& sock = clientinfo->get_socket();
 				auto& player = clientinfo->get_player();
 				auto& data = player.get_data<MachiavelliData>();
 			}
 		}},
-		{2, [](Game& game, std::weak_ptr<ClientInfo> client) {
+		{3, [](Game& game, std::weak_ptr<ClientInfo> client) { //magier
 			if (auto clientinfo = client.lock()) {
 				auto& sock = clientinfo->get_socket();
 				auto& player = clientinfo->get_player();
 				auto& data = player.get_data<MachiavelliData>();
 			}
 		}},
-		{3, [](Game& game, std::weak_ptr<ClientInfo> client) {
+		{4, [](Game& game, std::weak_ptr<ClientInfo> client) { //koning
 			if (auto clientinfo = client.lock()) {
 				auto& sock = clientinfo->get_socket();
 				auto& player = clientinfo->get_player();
 				auto& data = player.get_data<MachiavelliData>();
+				data.gold_coins += data.count_color("geel");
 			}
 		}},
-		{4, [](Game& game, std::weak_ptr<ClientInfo> client) {
+		{5, [](Game& game, std::weak_ptr<ClientInfo> client) { //prediker
 			if (auto clientinfo = client.lock()) {
 				auto& sock = clientinfo->get_socket();
 				auto& player = clientinfo->get_player();
 				auto& data = player.get_data<MachiavelliData>();
+				data.gold_coins += data.count_color("blauw");
 			}
 		}},
-		{5, [](Game& game, std::weak_ptr<ClientInfo> client) {
-			if (auto clientinfo = client.lock()) {
-				auto& sock = clientinfo->get_socket();
-				auto& player = clientinfo->get_player();
-				auto& data = player.get_data<MachiavelliData>();
-			}
-		}},
-		{6, [](Game& game, std::weak_ptr<ClientInfo> client) {
+		{6, [](Game& game, std::weak_ptr<ClientInfo> client) { //koopman
 			if (auto clientinfo = client.lock()) {
 				auto& sock = clientinfo->get_socket();
 				auto& player = clientinfo->get_player();
 				auto& data = player.get_data<MachiavelliData>();
 				data.gold_coins += 1;
+				data.gold_coins += data.count_color("groen");
 			}
 		}},
-		{7, [](Game& game, std::weak_ptr<ClientInfo> client) {
+		{7, [](Game& game, std::weak_ptr<ClientInfo> client) { //bouwman
 			if (auto clientinfo = client.lock()) {
 				auto& sock = clientinfo->get_socket();
 				auto& player = clientinfo->get_player();
 				auto& data = player.get_data<MachiavelliData>();
 			}
 		}},
-		{8, [](Game& game, std::weak_ptr<ClientInfo> client) {
+		{8, [](Game& game, std::weak_ptr<ClientInfo> client) { //condotiere
 			if (auto clientinfo = client.lock()) {
 				auto& sock = clientinfo->get_socket();
 				auto& player = clientinfo->get_player();
 				auto& data = player.get_data<MachiavelliData>();
+				data.gold_coins += data.count_color("rood");
 			}
 		}}
 	};

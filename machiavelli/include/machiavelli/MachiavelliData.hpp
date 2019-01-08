@@ -21,4 +21,13 @@ struct MachiavelliData : public PlayerData {
 	PlayerOptions in_option;
 	OptionHandler<CharacterCard> character_card_options;
 	OptionHandler<BuildingCard> building_card_options;
+
+	int count_color(std::string color) {
+		int i = 0;
+		std::for_each(build_buildings.begin(), build_buildings.end(), [&](BuildingCard& card) {
+			if (card.get_color() == color)
+				i++;
+		});
+		return i;
+	}
 };
