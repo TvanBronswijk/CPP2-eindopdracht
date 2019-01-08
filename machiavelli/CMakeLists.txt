@@ -17,5 +17,5 @@ target_include_directories(machiavelli PRIVATE
 	"include"
 )
 
-add_custom_target(pigisland-resources ALL
+add_custom_target(machiavelli-resources ALL
   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/layouts" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/layouts")
