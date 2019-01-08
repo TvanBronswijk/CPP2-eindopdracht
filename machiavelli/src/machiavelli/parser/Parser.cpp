@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include "machiavelli/util.hpp"
 
 namespace parsing {
 	std::vector<BuildingCard> make_buildings() {
@@ -30,6 +31,8 @@ namespace parsing {
 		{
 			charactercards[character.get_number()] = character;
 		}
+		auto random1 = random_int(1, 8);
+		charactercards.erase(random1);
 		return charactercards;
 	}
 	//TODO::end line in for_each loop not in object

@@ -12,8 +12,8 @@ public:
 	friend std::istream& operator>>(std::istream& str, CharacterCard& charactercard);
 	friend std::ostream& operator<<(std::ostream& str, CharacterCard& charactercard);
 
-	int get_number() { return number_; }
-	std::string get_name() { return name_; }
+	int get_number() const { return number_; }
+	std::string get_name() const { return name_; }
 };
 
 
