@@ -33,3 +33,21 @@ private:
 	int players_turn;
 	int king;
 };
+
+
+/*
+Hallo tobi,
+
+ik heb de game loop zover af ik heb al vanaf het begin de speler 2 goud gegeven dit stond in het document. ook stond er in het document dat een speler bij het begin 
+4 gebouwenkaarten van de gedekte stapel krijgt en 1 overzichtskaart. dit heb ik nog niet gemaakt.
+
+verder heb ik het uitrekenen van de highscore ook nog niet gedaan wel de validatie om hier in te komen. de methode die word aangeroepen is "calculate_highscore". 
+dit moet dus ook nog gemaakt worden.
+
+ik heb er wel al voor gezorgt dat de speler die aan het wachten is GEEN commandos kan uitvoeren behalve de chat en de hallo commando om het nog een beetje leuk te houden.
+
+tip: gebruik get_random om het kaarten te kiezen en te droppen overteslaan en !finish als je klaar ben met je beurt.
+
+succes straks nog (over 2 en half uur haha). ik ga slapen.
+
+*/
