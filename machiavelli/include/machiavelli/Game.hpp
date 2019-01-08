@@ -17,6 +17,7 @@ public:
 	void next_turn(std::weak_ptr<ClientInfo> client);
 	void turn_to_pick_Character_cards(std::weak_ptr<ClientInfo> clientinfo) const;
 	std::weak_ptr<ClientInfo> get_next_player();
+	bool random_start_of_round(std::weak_ptr<ClientInfo> client);
 	int get_players_turn() { return players_turn; }
 
 	std::unordered_map<int, CharacterCard> charactercards_;

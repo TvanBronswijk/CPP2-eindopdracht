@@ -8,7 +8,7 @@
 #include <iterator>
 
 using namespace validate;
-Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsing::make_buildings()), players_turn(1), characters_turn(1), king(1) {
+Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsing::make_buildings()), players_turn(1), characters_turn(0), king(1) {
 	_characterfunctions = {
 		{1, [](Game& game, std::weak_ptr<ClientInfo> client) {
 			if (auto clientinfo = client.lock()) {
@@ -68,7 +68,7 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 			}
 		}}
 	};
-	
+
 	_commands =
 	{
 		{
@@ -89,10 +89,13 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 			[&](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
 				if (auto clientinfo = client.lock()) {
 					auto& sock = clientinfo->get_socket();
-					auto& player = clientinfo->get_player();
-					auto& data = player.get_data<MachiavelliData>();
-					data.gold_coins += 2;
-					sock << "recieved 2 gold." << "\r\n";
+					if (clientinfo->get_player().get_data<MachiavelliData>().player_state == Player_state::Playing) {
+						auto& sock = clientinfo->get_socket();
+						auto& player = clientinfo->get_player();
+						auto& data = player.get_data<MachiavelliData>();
+						data.gold_coins += 2;
+						sock << "recieved 2 gold." << "\r\n";
+					}
 				}
 			}}
 		},
@@ -101,7 +104,10 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 			{"Get Cards at Start of Turn [No Arguments]",
 			[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
 			[&](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
-				client.lock()->get_socket() << "not yet implemented";
+
+				//if (clientinfo->get_player().get_data<MachiavelliData>().player_state == Player_state::Playing) {
+			client.lock()->get_socket() << "not yet implemented";
+			//}
 			}}
 		},
 		{
@@ -110,18 +116,20 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 			[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
 			[this](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
 				if (auto clientinfo = client.lock()) {
-					auto& sock = clientinfo->get_socket();
-					auto& player = clientinfo->get_player();
-					auto& data = player.get_data<MachiavelliData>();
-					data.in_option = MachiavelliData::PlayerOptions::Character;
+					if (clientinfo->get_player().get_data<MachiavelliData>().player_state == Player_state::Playing) {
+						auto& sock = clientinfo->get_socket();
+						auto& player = clientinfo->get_player();
+						auto& data = player.get_data<MachiavelliData>();
+						data.in_option = MachiavelliData::PlayerOptions::Character;
 
-					std::vector<CharacterCard*> my_characters{};
-					std::transform(data.character_cards.begin(), data.character_cards.end(), std::back_inserter(my_characters), 
-						[](auto& pair) { return &pair.second; });
-					data.character_card_options = { my_characters, [this, &client](CharacterCard& character) { this->_characterfunctions.at(character.get_number())(*this, client); } };
-					sock << "Choose one:" << "\r\n";
-					for (int i = 0; i < my_characters.size(); i++) {
-						sock << "[" << std::to_string(i) << "] " << my_characters[i]->get_name() << "\r\n";
+						std::vector<CharacterCard*> my_characters{};
+						std::transform(data.character_cards.begin(), data.character_cards.end(), std::back_inserter(my_characters),
+							[](auto& pair) { return &pair.second; });
+						data.character_card_options = { my_characters, [this, &client](CharacterCard& character) { this->_characterfunctions.at(character.get_number())(*this, client); } };
+						sock << "Choose one:" << "\r\n";
+						for (int i = 0; i < my_characters.size(); i++) {
+							sock << "[" << std::to_string(i) << "] " << my_characters[i]->get_name() << "\r\n";
+						}
 					}
 				}
 			}}
@@ -132,11 +140,13 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 			[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
 			[this](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
 				if (auto clientinfo = client.lock()) {
-					auto& sock = clientinfo->get_socket();
-					auto& player = clientinfo->get_player();
-					auto& data = player.get_data<MachiavelliData>();
-					for (int i = 0; i < data.building_cards.size(); i++) {
-						sock << "[" << i << "] " << data.building_cards[i].get_name() << "\r\n";
+					if (clientinfo->get_player().get_data<MachiavelliData>().player_state == Player_state::Playing) {
+						auto& sock = clientinfo->get_socket();
+						auto& player = clientinfo->get_player();
+						auto& data = player.get_data<MachiavelliData>();
+						for (int i = 0; i < data.building_cards.size(); i++) {
+							sock << "[" << i << "] " << data.building_cards[i].get_name() << "\r\n";
+						}
 					}
 				}
 			}}
@@ -147,15 +157,17 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 			[&](StringArgs args) { return validate_that<std::string>(args[0], is_single_digit); },
 			[this](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
 				if (auto clientinfo = client.lock()) {
-					auto& sock = clientinfo->get_socket();
-					auto& player = clientinfo->get_player();
-					auto& data = player.get_data<MachiavelliData>();
-					
-					auto& chosen_card = data.building_cards[std::stoi(args[0])];
-					if (chosen_card.get_coins() < data.gold_coins) {
-						data.gold_coins -= chosen_card.get_coins();
-						data.build_buildings.push_back(chosen_card);
-						//data.building_cards.erase(std::remove(data.building_cards.begin(), data.building_cards.end(), chosen_card), data.building_cards.end());
+					if (clientinfo->get_player().get_data<MachiavelliData>().player_state == Player_state::Playing) {
+						auto& sock = clientinfo->get_socket();
+						auto& player = clientinfo->get_player();
+						auto& data = player.get_data<MachiavelliData>();
+
+						auto& chosen_card = data.building_cards[std::stoi(args[0])];
+						if (chosen_card.get_coins() < data.gold_coins) {
+							data.gold_coins -= chosen_card.get_coins();
+							data.build_buildings.push_back(chosen_card);
+							//data.building_cards.erase(std::remove(data.building_cards.begin(), data.building_cards.end(), chosen_card), data.building_cards.end());
+						}
 					}
 				}
 			}}
@@ -168,24 +180,27 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 				auto number = std::stoi(args[0]);
 				auto card = game.charactercards_.find(number);
 				if (auto clientInfo = client.lock()) {
-					auto& data = clientInfo->get_player().get_data<MachiavelliData>();
-					if (!data.take_card) {
-						data.character_cards[card->first] = card->second;
-						data.take_card = true;
-						game.charactercards_.erase(number);
-						if (data.drop_card && data.take_card) {
-							data.drop_card = false;
-							data.take_card = false;
-							if (game.charactercards_.size() != 0) {
-								auto player = this->get_next_player();
-								this->turn_to_pick_Character_cards(player);
+					if (clientInfo->get_player().get_data<MachiavelliData>().player_state == Player_state::Collecting) {
+						auto& data = clientInfo->get_player().get_data<MachiavelliData>();
+						if (!data.take_card) {
+							data.character_cards[card->first] = card->second;
+							data.take_card = true;
+							game.charactercards_.erase(number);
+							if (data.drop_card && data.take_card) {
+								data.drop_card = false;
+								data.take_card = false;
+								if (game.charactercards_.size() != 0) {
+									data.player_state = Player_state::Waiting;
+									auto player = this->get_next_player();
+									this->turn_to_pick_Character_cards(player);
+								}
+								else {
+									this->next_turn(client);
+								}
 							}
 							else {
-								this->next_turn(client);
+								this->turn_to_pick_Character_cards(client);
 							}
-						}
-						else {
-							this->turn_to_pick_Character_cards(client);
 						}
 					}
 				}
@@ -199,22 +214,25 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 				auto number = std::stoi(args[0]);
 				game.charactercards_.erase(number);
 				if (auto clientInfo = client.lock()) {
-					auto& data = clientInfo->get_player().get_data<MachiavelliData>();
-					if (!data.drop_card) {
-						data.drop_card = true;
-						if (data.drop_card && data.take_card) {
-							data.drop_card = false;
-							data.take_card = false;
-							if (game.charactercards_.size() != 0) {
-								auto player = this->get_next_player();
-								this->turn_to_pick_Character_cards(player);
+					if (clientInfo->get_player().get_data<MachiavelliData>().player_state == Player_state::Collecting) {
+						auto& data = clientInfo->get_player().get_data<MachiavelliData>();
+						if (!data.drop_card) {
+							data.drop_card = true;
+							if (data.drop_card && data.take_card) {
+								data.drop_card = false;
+								data.take_card = false;
+								if (game.charactercards_.size() != 0) {
+									data.player_state = Player_state::Waiting;
+									auto player = this->get_next_player();
+									this->turn_to_pick_Character_cards(player);
+								}
+								else {
+									this->next_turn(client);
+								}
 							}
 							else {
-								this->next_turn(client);
+								this->turn_to_pick_Character_cards(client);
 							}
-						}
-						else {
-							this->turn_to_pick_Character_cards(client);
 						}
 					}
 				}
@@ -225,17 +243,65 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 				{ "finish a turn",
 				[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
 				[this](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
-					auto player = this->get_next_player();
-					this->next_turn(player);
+					if (client.lock()->get_player().get_data<MachiavelliData>().player_state == Player_state::Playing) {
+					this->next_turn(client);
+					}
 				} }
+			},
+				{
+				"!get_random",
+				{ "get random starting charaters",
+				[&](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
+				[this](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
+					if (client.lock()->get_player().get_data<MachiavelliData>().player_state == Player_state::Collecting) {
+						if (this->random_start_of_round(client)) {
+							this->next_turn(client);
+						}
+					}
+				} 
 			}
+		}
 	};
+}
+
+bool Game::random_start_of_round(std::weak_ptr<ClientInfo> client) {
+	if (charactercards_.size() == 7) {
+		auto clients = _server->get_clients();
+		std::for_each(clients.begin(), clients.end(), [this](std::weak_ptr<ClientInfo> clientinfo)
+		{
+			if (auto clientInfo = clientinfo.lock()) {
+				int random1 = random_int(1, 8);
+				int random2 = random_int(1, 8);
+				auto card1 = charactercards_.find(random1);
+				auto card2 = charactercards_.find(random2);
+				while (random1 == random2 || card1 == charactercards_.end() || card2 == charactercards_.end()) {
+					random1 = random_int(1, 8);
+					random2 = random_int(1, 8);
+					card1 = charactercards_.find(random1);
+					card2 = charactercards_.find(random2);
+				}
+				auto& client_character_cards = clientInfo->get_player().get_data<MachiavelliData>().character_cards;
+				client_character_cards[random1] = charactercards_.find(random1)->second;
+				client_character_cards[random2] = charactercards_.find(random2)->second;
+				charactercards_.erase(random1);
+				charactercards_.erase(random2);
+			}
+		});
+		charactercards_.clear();
+		return true;
+	}
+	else {
+		if (auto clientInfo = client.lock()) {
+			clientInfo->get_socket() << "Sorry but this only if all cards are still in the deck...\r\n";
+		}
+		return false;
+	}
 }
 
 std::weak_ptr<ClientInfo> Game::get_next_player() {
 	std::weak_ptr<ClientInfo> clientinfo;
 	players_turn++;
-	if(players_turn == 3) {
+	if (players_turn == 3) {
 		players_turn = 1;
 	}
 	auto clients = _server->get_clients();
@@ -251,43 +317,45 @@ std::weak_ptr<ClientInfo> Game::get_next_player() {
 }
 
 
-void Game::next_turn(std::weak_ptr<ClientInfo> client){
-	if (characters_turn != 9) {
-		bool found = false;
-		auto characters_turn_ = characters_turn;
-		if (auto clientInfo = client.lock()) {
-			auto& socket = clientInfo->get_socket();
-			socket << "Your turn is over\r\n";
-			auto& player_data = clientInfo->get_player().get_data<MachiavelliData>();
-			player_data.player_state = Player_state::Waiting;
+void Game::next_turn(std::weak_ptr<ClientInfo> client) {
+	characters_turn++;
+	bool found = false;
+	auto& characters_turn_ = characters_turn;
+	if (auto clientInfo = client.lock()) {
+		auto& socket = clientInfo->get_socket();
+		socket << "Your turn is over\r\n";
+		auto& player_data = clientInfo->get_player().get_data<MachiavelliData>();
+		player_data.player_state = Player_state::Waiting;
 
-			auto clients = _server->get_clients();
-			while (!found) {
-				std::for_each(clients.begin(), clients.end(), [&characters_turn_, &found, this](std::weak_ptr<ClientInfo> clientinfo)
-				{
-					if (auto clientInfo = clientinfo.lock()) {
-						auto& client_character_cards = clientInfo->get_player().get_data<MachiavelliData>().character_cards;
-						if (client_character_cards.find((characters_turn_)) != client_character_cards.end()) {
-							auto& socket = clientInfo->get_socket();
-							auto& player_data = clientInfo->get_player().get_data<MachiavelliData>();
-							socket << "It is your turn!\r\n" << _server->prompt();
-							player_data.player_state = Player_state::Playing;
-							found = true;
-						}
+		auto clients = _server->get_clients();
+		if (characters_turn_ == 9) found = true;
+		while (!found) {
+			std::for_each(clients.begin(), clients.end(), [&characters_turn_, &found, this](std::weak_ptr<ClientInfo> clientinfo)
+			{
+				if (characters_turn_ == 9) found = true;
+				if (auto clientInfo = clientinfo.lock()) {
+					auto& client_character_cards = clientInfo->get_player().get_data<MachiavelliData>().character_cards;
+					if (client_character_cards.find((characters_turn_)) != client_character_cards.end()) {
+						auto& socket = clientInfo->get_socket();
+						auto& player_data = clientInfo->get_player().get_data<MachiavelliData>();
+						socket << "It is the turn of the: " + client_character_cards.find(characters_turn_)->second.get_name() + "!\r\n" << _server->prompt();
+						player_data.player_state = Player_state::Playing;
+						found = true;
 					}
-				});
-				characters_turn++;
-			}
+				}
+			});
+			if(!found)
+			characters_turn++;
 		}
 	}
-	else {
-		if (!check_for_eight_buildings()) {
+	if (characters_turn == 9) {
+		if (check_for_eight_buildings()) {
 			calculate_highscore();
 		}
 		else {
 			prepare_round();
-			get_next_player();
-
+			auto player = get_next_player();
+			turn_to_pick_Character_cards(player);
 		}
 	}
 }
@@ -297,17 +365,33 @@ void Game::calculate_highscore() {
 	int score_player2;
 
 	int player = 1;
-	std::for_each(clients.begin(), clients.end(), [&score_player1,&score_player2](std::weak_ptr<ClientInfo> clientinfo)
+	std::for_each(clients.begin(), clients.end(), [&score_player1, &score_player2](std::weak_ptr<ClientInfo> clientinfo)
 	{
 		if (auto clientInfo = clientinfo.lock()) {
-
+			//TODO::calculate highscore players
 		}
 	});
 }
 
 void Game::prepare_round() {
-	players_turn = king++;
+	players_turn = king;
 	charactercards_ = parsing::make_characters();
+	characters_turn = 0;
+	auto clients = _server->get_clients();
+	int number = 1;
+	std::for_each(clients.begin(), clients.end(), [this,&number](std::weak_ptr<ClientInfo> clientinfo)
+	{
+		if (auto clientInfo = clientinfo.lock()) {
+			clientInfo->get_player().get_data<MachiavelliData>().character_cards.clear();
+			clientInfo->get_player().get_data<MachiavelliData>().player_state = Player_state::Waiting;
+
+			clientinfo.lock()->get_player().get_data<MachiavelliData>().drop_card = false;
+			clientinfo.lock()->get_player().get_data<MachiavelliData>().take_card = false;
+			if (number == get_players_turn()) {
+				clientinfo.lock()->get_player().get_data<MachiavelliData>().drop_card = true;
+			}
+		}
+	});
 }
 
 bool Game::check_for_eight_buildings() {
@@ -383,33 +467,29 @@ std::shared_ptr<ClientInfo> Game::on_client_register(Socket sock) const {
 
 	auto clients = _server->get_clients();
 	if (clients.size() == 1) {//start a game
-		sock << "lets start the game!" << _server->prompt();
+		sock << "lets start the game!\r\n" << _server->prompt();
 		std::for_each(clients.begin(), clients.end(), [this](std::weak_ptr<ClientInfo> clientinfo)
 		{
+			clientinfo.lock()->get_socket() << "lets start the game!\r\n";
 			clientinfo.lock()->get_player().get_data<MachiavelliData>().drop_card = true;
+			clientinfo.lock()->get_player().get_data<MachiavelliData>().player_state = Player_state::Collecting;
 			turn_to_pick_Character_cards(clientinfo);
 		});
 	}
 	return std::make_shared<ClientInfo>(std::move(sock), Player{ name, std::make_unique<MachiavelliData>() });
 }
 
-void Game::turn_to_pick_Character_cards(std::weak_ptr<ClientInfo> clientinfo) const{
-		int random1 = 0;
-		int random2 = 0;
-		if (auto clientInfo = clientinfo.lock()) {
-			while (random1 == random2) {
-				random1 = random_int(1, 8);
-				random2 = random_int(1, 8);
-			}
-			auto& client_data = clientInfo->get_player().get_data<MachiavelliData>();
-			client_data.player_state = Player_state::Collecting;
-			auto& client_socket = clientInfo->get_socket();
-			client_socket << "Pick or drop a card!\r\nWhich card do you want:\r\n";
-			std::for_each(charactercards_.begin(), charactercards_.end(), [this, &client_socket](std::pair<int, CharacterCard> card)
-			{
-				client_socket << "[" + std::to_string(card.first) + "] " + card.second.get_name() + "\r\n";
-			});
-			client_socket << _server->prompt();
+void Game::turn_to_pick_Character_cards(std::weak_ptr<ClientInfo> clientinfo) const {
+	if (auto clientInfo = clientinfo.lock()) {
+		auto& client_data = clientInfo->get_player().get_data<MachiavelliData>();
+		client_data.player_state = Player_state::Collecting;
+		auto& client_socket = clientInfo->get_socket();
+		client_socket << "Pick or drop a card!\r\nWhich card do you want:\r\n";
+		std::for_each(charactercards_.begin(), charactercards_.end(), [this, &client_socket](std::pair<int, CharacterCard> card)
+		{
+			client_socket << "[" + std::to_string(card.first) + "] " + card.second.get_name() + "\r\n";
+		});
+		client_socket << _server->prompt();
 	}
 }
 
