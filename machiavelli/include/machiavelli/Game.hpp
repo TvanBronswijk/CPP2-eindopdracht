@@ -1,6 +1,6 @@
 #pragma once
-#include <server\ServerCallbackHandler.hpp>
-#include <server\command\ServerCommand.hpp>
+#include <server/ServerCallbackHandler.hpp>
+#include <server/command/ServerCommand.hpp>
 #include "machiavelli/objects/CharacterCard.hpp"
 #include "machiavelli/objects/BuildingCard.hpp"
 #include "machiavelli/parser/Parser.hpp"

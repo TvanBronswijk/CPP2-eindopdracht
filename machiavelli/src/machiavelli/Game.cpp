@@ -530,6 +530,7 @@ bool Game::on_command(ClientCommand com) {
 
 		}
 	}
+	return false;
 }
 
 std::shared_ptr<ClientInfo> Game::on_client_register(Socket sock) const {

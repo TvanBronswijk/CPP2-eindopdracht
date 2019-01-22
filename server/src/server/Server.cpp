@@ -1,35 +1,5 @@
-#include "Server.hpp"
-
-void Server::accept(std::function<void(Socket)> on_connect) {
-	try {
-		log("Server started.\nListening...\n");
-		while (_running) {
-			_socket.accept(on_connect);
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		}
-	}
-	catch (const std::exception& ex) {
-		(*this) << ex.what() << '\n';
-	}
-	catch (...) {
-		log("An error has occured.\n");
-	}
-}
-
-void Server::add_client(Socket socket) {
-	_threads.emplace_back(client_thread, std::ref(*this), std::move(socket));
-}
-
-void Server::announce(std::string message) {
-	std::for_each(_clients.begin(), _clients.end(), [this, message](std::weak_ptr<ClientInfo> client) { if (auto clientinfo = client.lock()) clientinfo->get_socket() << "\r\n" << message << this->prompt(); });
-}
-
-std::unique_ptr<Server> Server::Builder::build(std::unique_ptr<ServerCallbackHandler> handler)
-{
-	auto server = std::make_unique<Server>(_server_name, _prompt, _port, std::move(handler));
-	server->_threads.emplace_back(command_thread, std::ref(*server));
-	return std::move(server);
-}
+#include "server/Server.hpp"
+#include <algorithm>
 
 void command_thread(Server& server)
 {
@@ -122,4 +92,35 @@ void close_server(Server& server) {
 
 Server::Builder create_server() {
 	return Server::Builder();
+}
+
+void Server::accept(std::function<void(Socket)> on_connect) {
+	try {
+		log("Server started.\nListening...\n");
+		while (_running) {
+			_socket.accept(on_connect);
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		}
+	}
+	catch (const std::exception& ex) {
+		(*this) << ex.what() << '\n';
+	}
+	catch (...) {
+		log("An error has occured.\n");
+	}
+}
+
+void Server::add_client(Socket socket) {
+	_threads.emplace_back(client_thread, std::ref(*this), std::move(socket));
+}
+
+void Server::announce(std::string message) {
+	std::for_each(_clients.begin(), _clients.end(), [this, message](std::weak_ptr<ClientInfo> client) { if (auto clientinfo = client.lock()) clientinfo->get_socket() << "\r\n" << message << this->prompt(); });
+}
+
+std::unique_ptr<Server> Server::Builder::build(std::unique_ptr<ServerCallbackHandler> handler)
+{
+	auto server = std::make_unique<Server>(_server_name, _prompt, _port, std::move(handler));
+	server->_threads.emplace_back(command_thread, std::ref(*server));
+	return std::move(server);
 }

@@ -1,13 +1,17 @@
-#define _CRTDBG_MAP_ALLOC  
+#ifdef _MSC_VER
+#define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>  
-#include <crtdbg.h>  
+#include <crtdbg.h>
+#endif
 
 #include "machiavelli/Game.hpp"
 #include <server.hpp>
 
 int main(int argc, const char * argv[])
 {
+#ifdef _MSC_VER
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
 
 	auto game = std::make_unique<Game>();
 	auto server = create_server()

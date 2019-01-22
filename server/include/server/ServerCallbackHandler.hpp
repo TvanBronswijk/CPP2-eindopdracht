@@ -4,6 +4,7 @@
 #include "server/connection/ClientInfo.hpp"
 #include "server/command/ClientCommand.hpp"
 
+class Server;
 class ServerCallbackHandler {
 	friend class Server;
 public:

@@ -5,5 +5,6 @@ set(INSTALL_DIR ${PROJECT_BINARY_DIR}/out)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${INSTALL_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${INSTALL_DIR})
 
+set(CMAKE_CXX_FLAGS -pthread)
 add_subdirectory(server)
 add_subdirectory(machiavelli)

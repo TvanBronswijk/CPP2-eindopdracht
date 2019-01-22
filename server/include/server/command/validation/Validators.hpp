@@ -10,7 +10,8 @@ namespace validate {
 
 	struct ValidationException : public std::exception
 	{
-		ValidationException(const char* msg) : std::exception(msg) {}
+		const char* msg;
+		ValidationException(const char* msg) : std::exception(), msg(msg) {}
 	};
 
 	template<class T>
