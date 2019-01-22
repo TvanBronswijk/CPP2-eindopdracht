@@ -1,5 +1,5 @@
 #pragma once
-#include <server/PlayerData.hpp>
+#include <server/player/PlayerData.hpp>
 #include <server/command/options/OptionHandler.hpp>
 #include "machiavelli/objects/CharacterCard.hpp"
 #include "machiavelli/objects/BuildingCard.hpp"

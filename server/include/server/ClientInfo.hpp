@@ -9,8 +9,8 @@
 #include <string>
 #include <utility>
 
-#include "Socket.hpp"
-#include "Player.hpp"
+#include "connection/Socket.hpp"
+#include "player/Player.hpp"
 
 class ClientInfo {
 	Socket _socket;

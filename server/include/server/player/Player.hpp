@@ -9,11 +9,11 @@
 
 #include <string>
 #include <memory>
-#include "server/PlayerData.hpp"
+#include "PlayerData.hpp"
 
 class Player {
 public:
-	Player() {}
+	Player() = default;
 	Player(const std::string name) : name{ name } {}
 	Player(const std::string name, std::unique_ptr<PlayerData> data) : name{ name }, _data{ std::move(data) } {}
 
