@@ -95,7 +95,8 @@ Server::Builder create_server() {
 
 void Server::accept(std::function<void(Socket)> on_connect) {
 	try {
-		log("Server started.\nListening...\n");
+		log("Server started @" + _socket.get_dotted_ip() + ":" + std::to_string(_tcp_port) + "(" + std::to_string(_socket.get_socket()) + ").\n");
+		log("Listening...\n");
 		while (_running) {
 			_socket.accept(on_connect);
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));

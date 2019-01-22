@@ -229,7 +229,8 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 		{
 			"!build",
 			{"Build a building from your hand. [ARG1: Card Number In Hand]",
-			[&](StringArgs args) { return validate_that<std::string>(args[0], is_single_digit); },
+			[&](StringArgs args) { return validate_that<StringArgs>(args, has_arg<std::string>(0))
+			        && validate_that<std::string>(args[0], is_single_digit<std::string>); },
 			[this](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
 				if (auto clientinfo = client.lock()) {
 					if (clientinfo->get_player().get_data<MachiavelliData>().player_state == Player_state::Playing) {
@@ -253,7 +254,9 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 		{
 			"!take_cc",
 			{"Take a character card",
-			[&](StringArgs args) { return validate_that<std::string>(args[0], is_single_digit) && validate_that<std::string>(args[0], is_between(1,9)); },
+			[&](StringArgs args) { return validate_that<StringArgs>(args, has_arg<std::string>(0))
+			        && validate_that<std::string>(args[0], is_single_digit<std::string>)
+			        && validate_that<std::string>(args[0], is_between<std::string>(1,9)); },
 			[&](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
 				auto number = std::stoi(args[0]);
 				auto card = game.charactercards_.find(number);
@@ -287,7 +290,9 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 		{
 			"!drop_cc",
 			{"Remove a character card from turn",
-			[&](StringArgs args) { return validate_that<std::string>(args[0], is_single_digit) && validate_that<std::string>(args[0], is_between(1,9)); },
+			[&](StringArgs args) { return validate_that<StringArgs>(args, has_arg<std::string>(0))
+			        && validate_that<std::string>(args[0], is_single_digit<std::string>)
+			        && validate_that<std::string>(args[0], is_between<std::string>(1,9)); },
 			[&](StringArgs args, Game& game, std::weak_ptr<ClientInfo> client) {
 				auto number = std::stoi(args[0]);
 				game.charactercards_.erase(number);

@@ -1,47 +1,58 @@
 #pragma once
+
 #include <exception>
 #include <functional>
 #include <string>
 #include <vector>
 
 namespace validate {
-	using StringArgs = std::vector<std::string>;
-	using Validator = std::function<bool(StringArgs)>;
+    using StringArgs = std::vector<std::string>;
+    using Validator = std::function<bool(StringArgs)>;
 
-	struct ValidationException : public std::exception
-	{
-		const char* msg;
-		ValidationException(const char* msg) : std::exception(), msg(msg) {}
-	};
+    struct ValidationException : public std::exception {
+        const char *msg;
 
-	template<class T>
-	bool validate_that(T arg, std::function<bool(T)> func) {
-		return func(arg);
-	}
+        ValidationException(const char *msg) : std::exception(), msg(msg) {}
+    };
 
-	template<class T>
-	bool is_empty(std::vector<T> vector) {
-		return vector.empty();
-	}
+    template<class T>
+    bool validate_that(T arg, std::function<bool(T)> func) {
+        return func(arg);
+    }
 
-	inline bool is_single_digit(std::string str) {
-		try {
-			auto digit = std::stoi(str);
-			return digit < 10 && digit >= 0;
-		}
-		catch(...){
-			return false;
-		}
-	}
+    template<class T>
+    bool is_empty(std::vector<T> vector) {
+        return vector.empty();
+    }
 
-	inline std::function<bool(std::string)> is_between(int min, int max) {
-		return [=](std::string str) {try 
-		{
-			auto digit = std::stoi(str);
-			return digit < max && digit >= min;
-		}
-		catch (...) {
-			return false;
-		}};
-	}
+    template<class T>
+    std::function<bool(std::vector<T>)> has_arg(size_t index) {
+        return [=](std::vector<T> vector) {
+            return vector.size() > index;
+        };
+    }
+
+    template<class T>
+    bool is_single_digit(T str) {
+        try {
+            auto digit = std::stoi(str);
+            return digit < 10 && digit >= 0;
+        }
+        catch (...) {
+            return false;
+        }
+    }
+
+    template<class T>
+    std::function<bool(T)> is_between(int min, int max) {
+        return [=](T str) {
+            try {
+                auto digit = std::stoi(str);
+                return digit < max && digit >= min;
+            }
+            catch (...) {
+                return false;
+            }
+        };
+    }
 }

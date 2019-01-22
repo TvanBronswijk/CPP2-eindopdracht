@@ -215,7 +215,7 @@ std::string Socket::get_dotted_ip() const
 		break;
 	}
 	default:
-		return "n/a";
+		return "localhost";
 	}
 	return result;
 }
