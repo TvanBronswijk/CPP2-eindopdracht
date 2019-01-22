@@ -9,7 +9,8 @@ class ServerCallbackHandler {
 	friend class Server;
 public:
 	enum class Event { quit, server_stop, command, text };
-	ServerCallbackHandler() = default;
+	ServerCallbackHandler() : _server(nullptr) {};
+	ServerCallbackHandler(Server& server) : _server(&server) {};
 	virtual ~ServerCallbackHandler() = default;
 	ServerCallbackHandler(const ServerCallbackHandler&) = delete;
 	ServerCallbackHandler(ServerCallbackHandler&&) = delete;
