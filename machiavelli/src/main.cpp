@@ -7,12 +7,8 @@
 #include "machiavelli/Game.hpp"
 #include <server.hpp>
 
-int main(int argc, const char * argv[])
+void run_game() 
 {
-#ifdef _MSC_VER
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif
-
 	auto game = std::make_unique<Game>();
 	auto server = create_server()
 		.with_name("Machiavelli")
@@ -26,6 +22,14 @@ int main(int argc, const char * argv[])
 	});
 
 	close_server(*server);
+}
+
+int main(int argc, const char * argv[])
+{
+#ifdef _MSC_VER
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+	run_game();
 	return 0;
 }
 

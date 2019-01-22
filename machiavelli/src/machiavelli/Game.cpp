@@ -592,3 +592,10 @@ ServerCallbackHandler::Event Game::on_client_input(std::weak_ptr<ClientInfo> cli
 		return Event::command;
 	}
 }
+
+Game::~Game() {
+	_commands.clear();
+	_characterfunctions.clear();
+	charactercards_.clear();
+	buildingcards_.clear();
+}

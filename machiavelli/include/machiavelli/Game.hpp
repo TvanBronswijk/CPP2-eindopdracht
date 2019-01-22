@@ -10,6 +10,7 @@ class Game : public ServerCallbackHandler {
 	using CharacterFunction = std::function<void(Game&, std::weak_ptr<ClientInfo>)>;
 public:
 	Game();
+	~Game();
 	bool on_command(ClientCommand) override;
 	std::shared_ptr<ClientInfo> on_client_register(Socket) const override;
 	Event on_client_input(std::weak_ptr<ClientInfo> client, std::string input) const override;

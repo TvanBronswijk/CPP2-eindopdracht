@@ -10,7 +10,7 @@ class ServerCallbackHandler {
 public:
 	enum class Event { quit, server_stop, command, text };
 	ServerCallbackHandler() = default;
-	~ServerCallbackHandler() = default;
+	virtual ~ServerCallbackHandler() = default;
 	//TODO copy en move semantics
 	virtual bool on_command(ClientCommand) = 0;
 	virtual std::shared_ptr<ClientInfo> on_client_register(Socket) const = 0;
