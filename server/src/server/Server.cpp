@@ -51,19 +51,15 @@ void client_thread(Server& server, Socket socket)
 				std::string cmd;
 				if (client.readline([&cmd](std::string input) { cmd = input; }) && !cmd.empty()) {
 					server << '[' << client.get_dotted_ip() << " (" << std::to_string(client.get_socket()) << ") " << player.get_name() << "] " << cmd << "\r\n";
-					
-					bool quit = false;
+
 					switch (server._handler->on_client_input(client_info, cmd)) {
 					case ServerCallbackHandler::Event::quit:
-						quit = true;
+						server._running = false;
 						break;
 					case ServerCallbackHandler::Event::server_stop:
 						server.stop();
 						break;
 					default:
-						break;
-					}
-					if (quit) {
 						break;
 					}
 				};
