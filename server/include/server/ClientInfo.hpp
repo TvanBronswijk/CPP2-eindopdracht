@@ -11,7 +11,7 @@
 
 #include "connection/Socket.hpp"
 #include "player/Player.hpp"
-#include "state/StateMachine.h"
+#include "server/state/StateMachine.hpp"
 
 class ClientInfo {
 	Socket _socket;

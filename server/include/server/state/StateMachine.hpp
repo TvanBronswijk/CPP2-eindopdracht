@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include <stack>
-#include "State.h"
+#include "State.hpp"
 
 class StateMachine {
 public:

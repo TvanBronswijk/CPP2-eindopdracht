@@ -108,7 +108,7 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 				auto& data = player.get_data<MachiavelliData>();
 				data.gold_coins += data.count_color("rood");
 
-				auto clients = game._server->get_clients();
+				auto clients = game._server->registry().clients;
 				Player* other;
 				std::for_each(clients.begin(), clients.end(), [&player, &other](std::weak_ptr<ClientInfo> client)
 				{
@@ -349,7 +349,7 @@ Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsi
 
 bool Game::random_start_of_round(std::weak_ptr<ClientInfo> client) {
 	if (charactercards_.size() == 7) {
-		auto clients = _server->get_clients();
+		auto clients = _server->registry().clients;
 		std::for_each(clients.begin(), clients.end(), [this](std::weak_ptr<ClientInfo> clientinfo)
 		{
 			if (auto clientInfo = clientinfo.lock()) {
@@ -387,7 +387,7 @@ std::weak_ptr<ClientInfo> Game::get_next_player() {
 	if (players_turn == 3) {
 		players_turn = 1;
 	}
-	auto clients = _server->get_clients();
+	auto clients = _server->registry().clients;
 	int number = 1;
 	std::for_each(clients.begin(), clients.end(), [this, &number, &clientinfo](std::weak_ptr<ClientInfo> client)
 	{
@@ -413,7 +413,7 @@ void Game::next_turn(std::weak_ptr<ClientInfo> client) {
 		player_data.player_state = Player_state::Waiting;
 		player_data.took_gold_or_cards = false;
 
-		auto clients = _server->get_clients();
+		auto clients = _server->registry().clients;
 		if (characters_turn_ == 9) found = true;
 		while (!found) {
 			std::for_each(clients.begin(), clients.end(), [&characters_turn_, &found, this](std::weak_ptr<ClientInfo> clientinfo)
@@ -446,7 +446,7 @@ void Game::next_turn(std::weak_ptr<ClientInfo> client) {
 	}
 }
 void Game::calculate_highscore() {
-	auto clients = _server->get_clients();
+	auto clients = _server->registry().clients;
 	std::for_each(clients.begin(), clients.end(), [](std::weak_ptr<ClientInfo> clientinfo)
 	{
 		if (auto clientInfo = clientinfo.lock()) {
@@ -460,7 +460,7 @@ void Game::prepare_round() {
 	players_turn = king;
 	charactercards_ = parsing::make_characters();
 	characters_turn = 0;
-	auto clients = _server->get_clients();
+	auto clients = _server->registry().clients;
 	int number = 1;
 	std::for_each(clients.begin(), clients.end(), [this,&number](std::weak_ptr<ClientInfo> clientinfo)
 	{
@@ -479,7 +479,7 @@ void Game::prepare_round() {
 
 bool Game::check_for_eight_buildings() {
 	int buildings = 0;
-	auto clients = _server->get_clients();
+	auto clients = _server->registry().clients;
 
 	std::for_each(clients.begin(), clients.end(), [&buildings](std::weak_ptr<ClientInfo> clientinfo)
 	{
@@ -544,7 +544,7 @@ std::shared_ptr<ClientInfo> Game::on_client_register(Socket sock) const {
 	while (!sock.readline([&name](std::string input) { name = input; }));
 
 
-	auto clients = _server->get_clients();
+	auto clients = _server->registry().clients;
 	if (clients.size() == 1) {//start a game
 		sock << "lets start the game!\r\n" << _server->prompt();
 		std::for_each(clients.begin(), clients.end(), [this](std::weak_ptr<ClientInfo> clientinfo)

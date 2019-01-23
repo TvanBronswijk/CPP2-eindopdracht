@@ -2,6 +2,7 @@
 #include "server/command/ClientCommand.hpp"
 #include "server/connection/Socket.hpp"
 #include "server/connection/Sync_queue.hpp"
+#include "server/ClientRegistry.hpp"
 #include "server/ServerCallbackHandler.hpp"
 #include <memory>
 #include <string>
@@ -26,28 +27,25 @@ public:
 		_handler->_server = this;
 	};
 
-	std::string name() { return _server_name; }
-	std::string prompt() { return _prompt; }
-	int port() { return _tcp_port; }
+	std::string name() const { return _server_name; }
+	std::string prompt() const { return _prompt; }
+	int port() const { return _tcp_port; }
 
-	bool is_running() { return _running; }
-	bool is_stopped() { return !_running; }
-	void stop() { _running = false; }
-
+	bool is_running() const { return _running; }
 	void accept(std::function<void(Socket)> on_connect);
-	void add_client(Socket socket);
 
 	void enqueue_command(ClientCommand command) { _queue.put(command); }
 	ClientCommand dequeue_command() { return ClientCommand{ _queue.get() }; }
 
+	ClientRegistry& registry() { return _registry; }
+	const ClientRegistry& registry() const { return _registry; }
+
+	void announce(char character);
 	void announce(std::string str);
-
-	std::vector<std::weak_ptr<ClientInfo>> get_clients() { return _clients; }
-
-	void log(char character) { std::cerr << character; }
-	void log(std::string message) { std::cerr << message; }
-	Server& operator << (char character) { log(character); return *this; }
-	Server& operator << (std::string message) { log(message); return *this; }
+	void log(char character) const { std::cerr << character; }
+	void log(std::string message) const { std::cerr << message; }
+	const Server& operator << (char character) const { log(character); return *this; }
+	const Server& operator << (std::string message) const { log(message); return *this; }
 private:
 	std::string _server_name;
 	std::string _prompt;
@@ -55,13 +53,13 @@ private:
 
 	bool _running;
 	ServerSocket _socket;
-	std::vector<std::thread> _threads;
-	std::vector<std::weak_ptr<ClientInfo>> _clients;
+	ClientRegistry _registry;
 	Sync_queue<ClientCommand> _queue;
 	std::unique_ptr<ServerCallbackHandler> _handler;
+	std::thread _command_thread;
 
-	friend void command_thread(Server&);
 	friend void client_thread(Server&, Socket);
+	friend void command_thread(Server&);
 	friend void close_server(Server&);
 };
 
