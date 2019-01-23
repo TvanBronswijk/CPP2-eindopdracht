@@ -4,22 +4,25 @@
 #include "ClientInfo.hpp"
 #include "server/command/ClientCommand.hpp"
 
-class Server;
-class ServerCallbackHandler {
-	friend class Server;
-public:
-	enum class Event { quit, server_stop, command, text };
-	ServerCallbackHandler() : _server(nullptr) {};
-	ServerCallbackHandler(Server& server) : _server(&server) {};
-	virtual ~ServerCallbackHandler() = default;
-	ServerCallbackHandler(const ServerCallbackHandler&) = delete;
-	ServerCallbackHandler(ServerCallbackHandler&&) = delete;
-	ServerCallbackHandler& operator=(const ServerCallbackHandler&) = delete;
-	ServerCallbackHandler& operator=(ServerCallbackHandler&&) = delete;
+namespace server {
+	class Server;
+	class ServerCallbackHandler {
+		friend class Server;
+	public:
+		enum class Event { quit, server_stop, command, text };
+		ServerCallbackHandler() : _server(nullptr) {};
+		ServerCallbackHandler(Server& server) : _server(&server) {};
+		virtual ~ServerCallbackHandler() = default;
+		ServerCallbackHandler(const ServerCallbackHandler&) = delete;
+		ServerCallbackHandler(ServerCallbackHandler&&) = delete;
+		ServerCallbackHandler& operator=(const ServerCallbackHandler&) = delete;
+		ServerCallbackHandler& operator=(ServerCallbackHandler&&) = delete;
 
-	virtual bool on_command(ClientCommand) = 0;
-	virtual std::shared_ptr<ClientInfo> on_client_register(Socket) const = 0;
-	virtual Event on_client_input(std::weak_ptr<ClientInfo>, std::string) const = 0;
-protected:
-	Server* _server;
-};
+		virtual bool on_command(command::ClientCommand) = 0;
+		virtual std::shared_ptr<ClientInfo> on_client_register(connection::Socket) const = 0;
+		virtual Event on_client_input(std::weak_ptr<ClientInfo>, std::string) const = 0;
+	protected:
+		Server* _server;
+	};
+
+}

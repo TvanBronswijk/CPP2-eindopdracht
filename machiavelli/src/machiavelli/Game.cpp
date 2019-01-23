@@ -6,8 +6,14 @@
 #include <sstream>
 #include <algorithm>
 #include <iterator>
+using namespace server;
+using namespace server::command;
+using namespace server::command::options;
+using namespace server::command::validate;
+using namespace server::connection;
+using namespace server::player;
 
-using namespace validate;
+
 Game::Game() : charactercards_(parsing::make_characters()), buildingcards_(parsing::make_buildings()), players_turn(1), characters_turn(0), king(1), skip(-1) {
 	_characterfunctions = {
 		{1, [](Game& game, std::weak_ptr<ClientInfo> client) { //moordenaar

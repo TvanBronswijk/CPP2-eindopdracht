@@ -11,22 +11,19 @@
 
 #include "connection/Socket.hpp"
 #include "player/Player.hpp"
-#include "server/state/StateMachine.hpp"
 
-class ClientInfo {
-	Socket _socket;
-	Player _player;
-	StateMachine _states;
-public:
-public:
-	ClientInfo(Socket socket, Player player)
-			: _socket{ std::move(socket) }, _player{ std::move(player) } {}
-	ClientInfo(Socket socket, Player player, std::unique_ptr<State> initial_state)
-		: _socket{ std::move(socket) }, _player{ std::move(player) }, _states{ std::move(initial_state) } {}
-	Socket& get_socket() { return _socket; }
-	const Socket& get_socket() const { return _socket; }
-	Player& get_player() { return _player; }
-	const Player& get_player() const { return _player; }
-	StateMachine& get_states() { return _states; }
-	const StateMachine& get_states() const { return _states; }
-};
+namespace server {
+	class ClientInfo {
+	public:
+		ClientInfo(connection::Socket socket, player::Player player)
+				: _socket{ std::move(socket) }, _player{ std::move(player) } {}
+		connection::Socket& get_socket() { return _socket; }
+		const connection::Socket& get_socket() const { return _socket; }
+		player::Player& get_player() { return _player; }
+		const player::Player& get_player() const { return _player; }
+	private:
+		connection::Socket _socket;
+		player::Player _player;
+	};
+}
+

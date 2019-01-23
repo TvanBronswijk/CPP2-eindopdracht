@@ -33,99 +33,100 @@ typedef long ssize_t;
 #include <sstream>
 #include <string>
 
-void throw_unless_would_block();
+namespace server::connection {
+	void throw_unless_would_block();
 
 //=============================================================================
-class Socket
-	//=============================================================================
-{
-protected:
-	SOCKET sock;
-	struct sockaddr_storage addr;
-	mutable CircularBuffer<char> buffer;
-public:
-	Socket() : sock(0), buffer{ 512 } {}
-	Socket(SOCKET sock, const struct sockaddr& address);
-	Socket(const Socket& other) = delete;
-	Socket(Socket&& other);
-	virtual ~Socket();
+	class Socket
+		//=============================================================================
+	{
+	protected:
+		SOCKET sock;
+		struct sockaddr_storage addr;
+		mutable CircularBuffer<char> buffer;
+	public:
+		Socket() : sock(0), buffer{ 512 } {}
+		Socket(SOCKET sock, const struct sockaddr& address);
+		Socket(const Socket& other) = delete;
+		Socket(Socket&& other);
+		virtual ~Socket();
 
-	Socket& operator=(const Socket& other) = delete;
-	Socket& operator=(Socket&& other);
+		Socket& operator=(const Socket& other) = delete;
+		Socket& operator=(Socket&& other);
 
-	SOCKET get_socket() const { return sock; }
-	void set_socket(SOCKET sock) { this->sock = sock; }
-	void close();
-	bool is_open() const { return sock > 0; }
-	std::string get_dotted_ip() const;
+		SOCKET get_socket() const { return sock; }
+		void set_socket(SOCKET sock) { this->sock = sock; }
+		void close();
+		bool is_open() const { return sock > 0; }
+		std::string get_dotted_ip() const;
 
-	ssize_t read(char *buf, size_t maxlen) const;
-	char read() const;
-	std::string readline() const;
+		ssize_t read(char *buf, size_t maxlen) const;
+		char read() const;
+		std::string readline() const;
 
-	void write(const std::string& msg) const;
-	void write(const char *buf, size_t len) const;
-	void write(char c) const;
+		void write(const std::string& msg) const;
+		void write(const char *buf, size_t len) const;
+		void write(char c) const;
 
-	const Socket& operator<<(const char c) const;
-	const Socket& operator<<(const char* message) const;
-	const Socket& operator<<(const std::string& message) const;
+		const Socket& operator<<(const char c) const;
+		const Socket& operator<<(const char* message) const;
+		const Socket& operator<<(const std::string& message) const;
 
-	template <typename T> const Socket& operator<<(T value) const {
-		write(std::to_string(value));
-		return *this;
-	}
-	template<typename Callback>
-	bool readline(Callback callback) const {
-		char c;
-		while (ssize_t n = ::recv(sock, &c, 1, 0)) {
-			if (n == 0) {
-				return false;
-			}
-			else if (n < 0) {
-				throw_unless_would_block();
-				break;
-			}
-
-			if (c == '\n') {
-				std::stringstream s{ "" };
-				for (int i{ 0 }; i < buffer.size(); ++i)
-					s << buffer[i];
-				buffer.clear();
-				callback(s.str());
-				return true;
-			}
-			if (c != '\r') {
-				buffer.push_back(c);
-			}
+		template <typename T> const Socket& operator<<(T value) const {
+			write(std::to_string(value));
+			return *this;
 		}
-		return false;
-	}
-};
+		template<typename Callback>
+		bool readline(Callback callback) const {
+			char c;
+			while (ssize_t n = ::recv(sock, &c, 1, 0)) {
+				if (n == 0) {
+					return false;
+				}
+				else if (n < 0) {
+					throw_unless_would_block();
+					break;
+				}
 
-//=============================================================================
-class ServerSocket : public Socket
-	//=============================================================================
-{
-private:
-	bool accept_nonblock(SOCKET &sock, sockaddr &client_addr);
-public:
-	ServerSocket(int port);
-	template<typename Callback>
-	void accept(Callback callback) {
-		SOCKET fd;
-		sockaddr client_addr;
-		if (accept_nonblock(fd, client_addr)) {
-			callback(Socket{ fd, client_addr });
+				if (c == '\n') {
+					std::stringstream s{ "" };
+					for (int i{ 0 }; i < buffer.size(); ++i)
+						s << buffer[i];
+					buffer.clear();
+					callback(s.str());
+					return true;
+				}
+				if (c != '\r') {
+					buffer.push_back(c);
+				}
+			}
+			return false;
 		}
 	};
-};
 
 //=============================================================================
-class ClientSocket : public Socket
-	//=============================================================================
-{
-public:
-	ClientSocket(const std::string& host, int port);
-};
+	class ServerSocket : public Socket
+		//=============================================================================
+	{
+	private:
+		bool accept_nonblock(SOCKET &sock, sockaddr &client_addr);
+	public:
+		ServerSocket(int port);
+		template<typename Callback>
+		void accept(Callback callback) {
+			SOCKET fd;
+			sockaddr client_addr;
+			if (accept_nonblock(fd, client_addr)) {
+				callback(Socket{ fd, client_addr });
+			}
+		};
+	};
 
+//=============================================================================
+	class ClientSocket : public Socket
+		//=============================================================================
+	{
+	public:
+		ClientSocket(const std::string& host, int port);
+	};
+}

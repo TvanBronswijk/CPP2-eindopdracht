@@ -6,6 +6,7 @@
 
 #include "machiavelli/Game.hpp"
 #include <server.hpp>
+using namespace server;
 
 void run_game() 
 {
@@ -16,7 +17,7 @@ void run_game()
 		.at_port(1080)
 		.build(std::move(game));
 
-	server->accept([&server](Socket sock) {
+	server->accept([&server](connection::Socket sock) {
 		(*server) << "A new connection from " << sock.get_dotted_ip() << " has been established.\n";
 		server->registry().register_client(*server, std::move(sock));
 	});

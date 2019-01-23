@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace validate {
+namespace server::command::validate {
     using StringArgs = std::vector<std::string>;
     using Validator = std::function<bool(StringArgs)>;
 

@@ -9,7 +9,7 @@
 
 enum class Player_state {Waiting, Playing, Collecting};
 
-struct MachiavelliData : public PlayerData {
+struct MachiavelliData : public server::player::PlayerData {
 	enum class PlayerOptions { Character, Building, None };
 	MachiavelliData() : gold_coins(2), player_state(Player_state::Waiting), in_option(PlayerOptions::None), drop_card(false), take_card(false), took_gold_or_cards(false) {};
 	
@@ -24,8 +24,8 @@ struct MachiavelliData : public PlayerData {
 	bool take_card;
 
 	PlayerOptions in_option;
-	OptionHandler<CharacterCard> character_card_options;
-	OptionHandler<BuildingCard> building_card_options;
+	server::command::options::OptionHandler<CharacterCard> character_card_options;
+	server::command::options::OptionHandler<BuildingCard> building_card_options;
 
 	int count_color(std::string color) {
 		int i = 0;
