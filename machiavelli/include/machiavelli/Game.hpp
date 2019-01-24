@@ -1,6 +1,6 @@
 #pragma once
 #include <server/ServerCallbackHandler.hpp>
-#include <server/command/ServerCommand.hpp>
+#include <server/command/Command.hpp>
 #include "machiavelli/objects/CharacterCard.hpp"
 #include "machiavelli/objects/BuildingCard.hpp"
 #include "machiavelli/parser/Parser.hpp"
@@ -11,7 +11,7 @@ class Game : public server::ServerCallbackHandler {
 public:
 	Game();
 	~Game();
-	bool on_command(server::command::ClientCommand) override;
+	bool on_command(server::input::Command) override;
 	std::shared_ptr<server::ClientInfo> on_client_register(server::connection::Socket) const override;
 	Event on_client_input(std::weak_ptr<server::ClientInfo> client, std::string input) const override;
 	
@@ -23,7 +23,7 @@ public:
 
 	std::unordered_map<int, CharacterCard> charactercards_;
 private:
-	std::unordered_map<std::string, server::command::ServerCommand<Game&, std::weak_ptr<server::ClientInfo>>> _commands;
+	std::unordered_map<std::string, server::command::Command<Game&, std::weak_ptr<server::ClientInfo>>> _commands;
 	std::unordered_map<int, CharacterFunction> _characterfunctions;
 	std::vector<BuildingCard> buildingcards_;
 	bool check_for_eight_buildings();

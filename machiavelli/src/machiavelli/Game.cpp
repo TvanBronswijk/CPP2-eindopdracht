@@ -11,6 +11,7 @@ using namespace server::command;
 using namespace server::command::options;
 using namespace server::command::validate;
 using namespace server::connection;
+using namespace server::input;
 using namespace server::player;
 
 
@@ -498,7 +499,7 @@ bool Game::check_for_eight_buildings() {
 	return (buildings >= 8);
 }
 
-bool Game::on_command(ClientCommand com) {
+bool Game::on_command(input::Command com) {
 	if (auto clientinfo = com.get_client_info().lock()) {
 		auto& sock = clientinfo->get_socket();
 		auto& player = clientinfo->get_player();
@@ -595,12 +596,15 @@ ServerCallbackHandler::Event Game::on_client_input(std::weak_ptr<ClientInfo> cli
 	else if (input == "!help") {
 		auto& sock = client.lock()->get_socket();
 		std::for_each(_commands.begin(), _commands.end(), [&](auto pair) { sock << pair.first << " - " << pair.second.get_description() << "\r\n"; });
-		sock << _server->prompt();
 		return Event::text;
 	}
-	else {
-		_server->enqueue_command(ClientCommand{ input, client });
+	else if(input[0] == '!'){
+		_server->enqueue_command(input::Command{ input, client });
 		return Event::command;
+	}
+	else {
+	    _server->announce(input);
+	    return Event::text;
 	}
 }
 

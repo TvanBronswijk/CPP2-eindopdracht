@@ -6,10 +6,10 @@
 
 namespace server::command {
 	template<class T, class ... Args>
-	class ServerCommand {
+	class Command {
 	public:
 		using Action = std::function<void(validate::StringArgs, T, Args...)>;
-		ServerCommand(std::string command, validate::Validator validator, Action action) : _desc(command), _validator(validator), _action(action) {}
+		Command(std::string command, validate::Validator validator, Action action) : _desc(command), _validator(validator), _action(action) {}
 		void try_action(validate::StringArgs strargs, T arg0, Args ... varargs) {
 			if (_validator(strargs))
 				_action(strargs, arg0, std::forward<Args>(varargs) ...);

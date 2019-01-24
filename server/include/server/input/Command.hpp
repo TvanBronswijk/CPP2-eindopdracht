@@ -1,6 +1,6 @@
 #pragma once
 //
-//  ClientCommand.h
+//  Command.h
 //  socketexample
 //
 //  Created by Bob Polis on 27/11/14.
@@ -12,10 +12,10 @@
 #include <memory>
 
 namespace server { class ClientInfo; }
-namespace server::command {
-	class ClientCommand {
+namespace server::input {
+	class Command {
 	public:
-		ClientCommand(const std::string& command_text, std::weak_ptr<ClientInfo> client_info)
+		Command(const std::string& command_text, std::weak_ptr<ClientInfo> client_info)
 				: cmd{ command_text }, info{ client_info } {}
 		std::string get_cmd() const { return cmd; }
 		std::weak_ptr<ClientInfo> get_client_info() const { return info; }

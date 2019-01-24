@@ -1,8 +1,7 @@
 #include "server/ClientRegistry.hpp"
 #include "server/Server.hpp"
-using namespace server::command;
-using namespace server::connection;
 
+using namespace server::connection;
 namespace server {
     void client_thread(Server& server, Socket socket)
     {
@@ -26,12 +25,12 @@ namespace server {
                                 break;
                             case ServerCallbackHandler::Event::server_stop:
                                 server._running = false;
-                                server.enqueue_command(ClientCommand{ cmd, client_info });
+                                server.enqueue_command(input::Command{ cmd, client_info });
                                 break;
-                            case ServerCallbackHandler::Event::command:
                             case ServerCallbackHandler::Event::text:
                                 client << server.prompt();
                                 break;
+                            case ServerCallbackHandler::Event::command:
                             default:
                                 break;
                         }

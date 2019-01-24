@@ -1,5 +1,5 @@
 #pragma once
-#include "server/command/ClientCommand.hpp"
+#include "server/input/Command.hpp"
 #include "server/connection/Socket.hpp"
 #include "server/connection/Sync_queue.hpp"
 #include "server/ClientRegistry.hpp"
@@ -35,8 +35,8 @@ namespace server {
 		bool is_running() const { return _running; }
 		void accept(std::function<void(connection::Socket)> on_connect);
 
-		void enqueue_command(command::ClientCommand command) { _queue.put(command); }
-		command::ClientCommand dequeue_command() { return command::ClientCommand{ _queue.get() }; }
+		void enqueue_command(input::Command command) { _queue.put(command); }
+		input::Command dequeue_command() { return input::Command{ _queue.get() }; }
 
 		ClientRegistry& registry() { return _registry; }
 		const ClientRegistry& registry() const { return _registry; }
@@ -55,7 +55,7 @@ namespace server {
 		bool _running;
 		connection::ServerSocket _socket;
 		ClientRegistry _registry;
-		connection::Sync_queue<command::ClientCommand> _queue;
+		connection::Sync_queue<input::Command> _queue;
 		std::unique_ptr<ServerCallbackHandler> _handler;
 		std::thread _command_thread;
 

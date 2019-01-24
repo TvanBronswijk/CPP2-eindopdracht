@@ -1,5 +1,5 @@
 #pragma once
-#include "server/command/ClientCommand.hpp"
+#include "server/input/Command.hpp"
 
 namespace server::player::state {
     class State {
@@ -10,6 +10,6 @@ namespace server::player::state {
         State(State&&) = delete;
         State& operator=(const State&) = delete;
         State& operator=(State&&) = delete;
-        virtual void handle(command::ClientCommand) = 0;
+        virtual void handle(input::Command) = 0;
     };
 }

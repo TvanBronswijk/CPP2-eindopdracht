@@ -2,7 +2,7 @@
 #include <string>
 #include "server/connection/Socket.hpp"
 #include "ClientInfo.hpp"
-#include "server/command/ClientCommand.hpp"
+#include "server/input/Command.hpp"
 
 namespace server {
 	class Server;
@@ -18,7 +18,7 @@ namespace server {
 		ServerCallbackHandler& operator=(const ServerCallbackHandler&) = delete;
 		ServerCallbackHandler& operator=(ServerCallbackHandler&&) = delete;
 
-		virtual bool on_command(command::ClientCommand) = 0;
+		virtual bool on_command(input::Command) = 0;
 		virtual std::shared_ptr<ClientInfo> on_client_register(connection::Socket) const = 0;
 		virtual Event on_client_input(std::weak_ptr<ClientInfo>, std::string) const = 0;
 	protected:

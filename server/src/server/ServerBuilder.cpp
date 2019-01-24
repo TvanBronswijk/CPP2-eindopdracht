@@ -1,16 +1,16 @@
 #include "server/Server.hpp"
-using namespace server::command;
 
 namespace server {
     void command_thread(Server& server)
     {
         try {
             while (server.is_running()) {
-                ClientCommand command = server.dequeue_command();
+                input::Command command = server.dequeue_command();
                 if (auto clientInfo = command.get_client_info().lock()) {
                     auto& client = clientInfo->get_socket();
                     try {
                         server._handler->on_command(command);
+                        client << server.prompt();
                     }
                     catch (const std::exception& ex) {
                         server << "*** exception in consumer thread for socket " << client.get_socket() << ": " << ex.what() << '\n';

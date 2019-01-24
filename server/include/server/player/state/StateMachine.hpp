@@ -11,7 +11,7 @@ namespace server::player::state {
         State& pop() { _stack.pop(); return peek(); }
         State& put(std::unique_ptr<State> state) { _stack.push(std::move(state)); return peek(); }
         State& peek() const { return *_stack.top(); }
-        void handle(command::ClientCommand cmd) const { peek().handle(std::move(cmd)); }
+        void handle(input::Command cmd) const { peek().handle(std::move(cmd)); }
     private:
         std::stack<std::unique_ptr<State>> _stack;
     };
