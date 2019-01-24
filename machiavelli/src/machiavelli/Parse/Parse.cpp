@@ -1,4 +1,4 @@
-#include "machiavelli/parser/Parser.hpp"
+#include "machiavelli/parse/Parse.hpp"
 #include <algorithm>
 #include <fstream>
 #include <sstream>
@@ -29,9 +29,9 @@ namespace parsing {
 		CharacterCard character{};
 		while (file >> character)
 		{
-			charactercards[character.get_number()] = character;
+			charactercards[character.get_order()] = character;
 		}
-		auto random1 = random_int(1, 8);
+		auto random1 = util::Random().next(1, 8);
 		charactercards.erase(random1);
 		return charactercards;
 	}

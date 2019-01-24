@@ -4,8 +4,8 @@
 #include <crtdbg.h>
 #endif
 
-#include "machiavelli/Game.hpp"
-#include <server.hpp>
+#include "machiavelli/InputHandler.hpp"
+#include <*server.hpp>
 using namespace server;
 
 void run_game() 

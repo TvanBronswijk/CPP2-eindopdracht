@@ -6,14 +6,13 @@
 
 class CharacterCard{
 private:
+	int order_;
 	std::string name_;
-	int number_;
 public:
+	int get_order() const { return order_; }
+	std::string get_name() const { return name_; }
 	friend std::istream& operator>>(std::istream& str, CharacterCard& charactercard);
 	friend std::ostream& operator<<(std::ostream& str, CharacterCard& charactercard);
-
-	int get_number() const { return number_; }
-	std::string get_name() const { return name_; }
 };
 
 
@@ -30,7 +29,7 @@ inline std::istream& operator>>(std::istream& str, CharacterCard& character)
 	{
 		switch (number) {
 		case 0:
-			character.number_ = std::stoi(cell);
+			character.order_ = std::stoi(cell);
 			break;
 		case 1:
 			character.name_ = cell;
@@ -43,8 +42,6 @@ inline std::istream& operator>>(std::istream& str, CharacterCard& character)
 
 inline std::ostream& operator<<(std::ostream& str, CharacterCard& charactercard)
 {
-	std::string object = std::to_string(charactercard.number_) + "," + charactercard.name_ +",\n";
-	str << object;
-
+	str << (std::to_string(charactercard.order_) + "," + charactercard.name_ +",\n");
 	return str;
 }

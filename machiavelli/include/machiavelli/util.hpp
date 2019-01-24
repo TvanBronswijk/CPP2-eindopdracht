@@ -2,11 +2,15 @@
 #include <random>
 #include <ctime>
 
-inline int random_int(int min, int max) {
-	std::default_random_engine generator;
-	generator.seed(time(0));
-
-	std::uniform_int_distribution<int> distribution1(min, max);
-
-	return distribution1(generator);
+namespace util {
+	class Random {
+	public:
+		Random() : Random(static_cast<unsigned long>(time(nullptr))) {}
+		explicit Random(unsigned long seed_value) { _generator.seed(seed_value); }
+		template<class T> T next() { return next(0, 1); }
+		template<class T> T next(T max) { return next(0, max); }
+		template<class T> T next(T min, T max) { return std::uniform_int_distribution<T>(min, max)(_generator); }
+	private:
+		std::default_random_engine _generator;
+	};
 }
