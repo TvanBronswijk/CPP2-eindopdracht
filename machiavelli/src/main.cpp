@@ -10,12 +10,12 @@ using namespace server;
 
 void run_game() 
 {
-	auto game = std::make_unique<Game>();
+	auto input = std::make_unique<InputHandler>();
 	auto server = create_server()
 		.with_name("Machiavelli")
 		.with_prompt("machiavelli> ")
 		.at_port(1080)
-		.build(std::move(game));
+		.build(std::move(input));
 
 	server->accept([&server](connection::Socket sock) {
 		(*server) << "A new connection from " << sock.get_dotted_ip() << " has been established.\n";
