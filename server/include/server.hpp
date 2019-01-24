@@ -15,4 +15,3 @@
 #include "server/ClientRegistry.hpp"
 #include "server/Server.hpp"
 #include "server/ServerCallbackHandler.hpp"
-#include "server/throw.hpp"
