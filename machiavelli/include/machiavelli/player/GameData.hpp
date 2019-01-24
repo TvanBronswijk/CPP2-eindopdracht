@@ -1,7 +1,7 @@
 #pragma once
+#include <vector>
 #include <server/player/PlayerData.hpp>
 #include "machiavelli/*cards.hpp"
-#include <vector>
 
 struct MachiavelliData : public server::player::PlayerData {
 	int gold_coins;

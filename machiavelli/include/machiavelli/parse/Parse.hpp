@@ -1,8 +1,6 @@
 #pragma once
-#include "machiavelli/cards/CharacterCard.hpp"
-#include "machiavelli/cards/BuildingCard.hpp"
+#include "machiavelli/*cards.hpp"
 #include <vector>
-#include <unordered_map>
 
 namespace parsing {
 	std::vector<BuildingCard> parse_buildings();
