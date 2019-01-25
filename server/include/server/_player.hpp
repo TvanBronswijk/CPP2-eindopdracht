@@ -1,5 +1,5 @@
 #pragma once
 
-#include "player/*state.hpp"
+#include "server/player/_state.hpp"
 #include "player/Player.hpp"
 #include "player/PlayerData.hpp"

@@ -5,12 +5,13 @@
 #endif
 
 #include "machiavelli/InputHandler.hpp"
-#include <*server.hpp>
+#include <_server.hpp>
 using namespace server;
 
 void run_game() 
 {
-	auto input = std::make_unique<InputHandler>();
+	std::unique_ptr<Context> ctx = nullptr;
+	auto input = std::make_unique<InputHandler>(*ctx);
 	auto server = create_server()
 		.with_name("Machiavelli")
 		.with_prompt("machiavelli> ")

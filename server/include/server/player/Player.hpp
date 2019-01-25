@@ -17,6 +17,8 @@ namespace server::player {
 	public:
 		Player() = default;
 		Player(const std::string name, std::unique_ptr<PlayerData> data) : _name{ name }, _data{ std::move(data) } {}
+		Player(const std::string name, std::unique_ptr<PlayerData> data, std::unique_ptr<state::State> initial_state)
+		: _name{ name }, _data{ std::move(data) }, _state{ std::move(initial_state) } {}
 
 		std::string get_name() const { return _name; }
 		template<class T>

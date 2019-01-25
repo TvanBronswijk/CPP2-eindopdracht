@@ -7,7 +7,8 @@ endif()
 add_executable (machiavelli
 		"src/main.cpp"
 		"src/machiavelli/InputHandler.cpp"
-        "src/machiavelli/io/IO.cpp")
+        "src/machiavelli/io/IO.cpp"
+		"src/machiavelli/states/BaseState.cpp")
 
 target_compile_features(machiavelli PUBLIC cxx_std_17)
 target_link_libraries(machiavelli PRIVATE server)
