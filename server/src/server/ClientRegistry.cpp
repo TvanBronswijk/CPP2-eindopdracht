@@ -28,8 +28,6 @@ namespace server {
                                 server.enqueue_command(input::Command{ "___SIG_KILL___", client_info });
                                 break;
                             case ServerCallbackHandler::Event::text:
-                                client << server.prompt();
-                                break;
                             case ServerCallbackHandler::Event::command:
                             default:
                                 break;
