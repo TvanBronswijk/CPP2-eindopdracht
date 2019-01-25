@@ -4,7 +4,7 @@
 #include "machiavelli/cards/CharacterCard.hpp"
 #include "machiavelli/cards/BuildingCard.hpp"
 
-struct MachiavelliData : public server::player::PlayerData {
+struct GameData : public server::player::PlayerData {
 	int gold_coins;
 	std::vector<CharacterCard> character_cards;
 	std::vector<BuildingCard> building_cards;

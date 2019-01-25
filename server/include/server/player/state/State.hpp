@@ -10,6 +10,6 @@ namespace server::player::state {
         State(State&&) = delete;
         State& operator=(const State&) = delete;
         State& operator=(State&&) = delete;
-        virtual void handle(input::Command) = 0;
+        virtual bool handle(input::Command) = 0;
     };
 }

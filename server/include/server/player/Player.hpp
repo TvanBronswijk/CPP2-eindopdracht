@@ -19,7 +19,6 @@ namespace server::player {
 		Player(const std::string name, std::unique_ptr<PlayerData> data) : _name{ name }, _data{ std::move(data) } {}
 
 		std::string get_name() const { return _name; }
-
 		template<class T>
 		T& get_data() {
 			static_assert(std::is_convertible<T*, PlayerData*>::value, "T must be a concrete implementation of PlayerData");
@@ -30,7 +29,8 @@ namespace server::player {
 			static_assert(std::is_convertible<T*, PlayerData*>::value, "T must be a concrete implementation of PlayerData");
 			return *(static_cast<T*>(_data.get()));
 		}
-
+		state::StateMachine& get_states() { return _state; }
+		const state::StateMachine& get_states() const {return _state; }
 	private:
 		std::string _name;
 		std::unique_ptr<PlayerData> _data;

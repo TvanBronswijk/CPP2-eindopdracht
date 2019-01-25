@@ -5,7 +5,7 @@
 namespace util {
 	class Random {
 	public:
-		Random() : Random(static_cast<unsigned long>(time(nullptr))) {}
+		Random() : Random(std::random_device()()) {}
 		explicit Random(unsigned long seed_value) { _generator.seed(seed_value); }
 		template<class T> T next() { return next(0, 1); }
 		template<class T> T next(T max) { return next(0, max); }

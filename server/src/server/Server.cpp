@@ -21,11 +21,11 @@ namespace server {
 	}
 
 	void Server::announce(char character) {
-		std::for_each(_registry.begin(), _registry.end(), [this, character](std::weak_ptr<ClientInfo> client) { if (auto clientinfo = client.lock()) clientinfo->get_socket() << "\r\n" << character << this->prompt(); });
+		std::for_each(_registry.begin(), _registry.end(), [this, character](std::weak_ptr<ClientInfo> client) { if (auto clientinfo = client.lock()) clientinfo->get_socket() << "\r" << character << '\n' << this->prompt(); });
 	}
 
 	void Server::announce(std::string message) {
-		std::for_each(_registry.begin(), _registry.end(), [this, message](std::weak_ptr<ClientInfo> client) { if (auto clientinfo = client.lock()) clientinfo->get_socket() << "\r\n" << message << this->prompt(); });
+		std::for_each(_registry.begin(), _registry.end(), [this, message](std::weak_ptr<ClientInfo> client) { if (auto clientinfo = client.lock()) clientinfo->get_socket() << "\r" << message << '\n' << this->prompt(); });
 	}
 
 	void close_server(Server& server) {

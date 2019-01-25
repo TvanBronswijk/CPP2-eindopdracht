@@ -25,7 +25,7 @@ namespace server {
                                 break;
                             case ServerCallbackHandler::Event::server_stop:
                                 server._running = false;
-                                server.enqueue_command(input::Command{ cmd, client_info });
+                                server.enqueue_command(input::Command{ "___SIG_KILL___", client_info });
                                 break;
                             case ServerCallbackHandler::Event::text:
                                 client << server.prompt();
@@ -35,13 +35,13 @@ namespace server {
                                 break;
                         }
                         if (quit) break;
-                    };
+                    }
                 }
                 catch (const std::exception& ex) {
                     client << "ERROR: " << ex.what() << "\r\n";
                 }
                 catch (...) {
-                    client.write("ERROR: something went wrong during handling of your request. Sorry!\r\n");
+                    client << "ERROR: something went wrong during handling of your request. Sorry!\r\n";
                 }
             }
         }
