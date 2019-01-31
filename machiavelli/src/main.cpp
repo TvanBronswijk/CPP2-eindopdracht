@@ -23,8 +23,6 @@ void run_game()
 		(*server) << "A new connection from " << sock.get_dotted_ip() << " has been established.\n";
 		server->registry().register_client(*server, std::move(sock));
 	});
-
-	close_server(*server);
 }
 
 int main(int argc, const char * argv[])

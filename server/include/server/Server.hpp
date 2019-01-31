@@ -24,9 +24,9 @@ namespace server {
 		};
 
 		Server(std::string name, std::string prompt, int port, std::unique_ptr<ServerCallbackHandler> handler)
-				: _running(true), _socket(port), _server_name(name), _prompt(prompt), _tcp_port(port), _handler(std::move(handler)) {
-			_handler->_server = this;
-		};
+				: _running(true), _socket(port), _server_name(name), _prompt(prompt), _tcp_port(port), _handler(std::move(handler))
+				{ _handler->_server = this; };
+		~Server();
 
 		std::string name() const { return _server_name; }
 		std::string prompt() const { return _prompt; }
@@ -64,7 +64,6 @@ namespace server {
 
 		friend void client_thread(Server&, connection::Socket);
 		friend void command_thread(Server&);
-		friend void close_server(Server&);
 	};
 
 	Server::Builder create_server();

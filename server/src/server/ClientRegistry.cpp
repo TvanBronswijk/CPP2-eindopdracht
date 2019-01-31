@@ -7,7 +7,7 @@ namespace server {
     {
         try {
             auto client_info = server._handler->on_client_register(std::move(socket));
-            server._registry.clients.push_back(client_info);
+            server._registry._clients.push_back(client_info);
             auto& client = client_info->get_socket();
             auto& player = client_info->get_player();
             client << server.prompt();
@@ -52,6 +52,12 @@ namespace server {
     }
 
     void ClientRegistry::register_client(Server& server, Socket socket) {
-        threads.emplace_back(client_thread, std::ref(server), std::move(socket));
+        _threads.emplace_back(client_thread, std::ref(server), std::move(socket));
+    }
+
+    ClientRegistry::~ClientRegistry() {
+        for(auto& thread : _threads) {
+            thread.join();
+        }
     }
 }
