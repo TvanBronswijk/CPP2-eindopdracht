@@ -21,11 +21,10 @@ bool InputHandler::on_command(input::Command cmd) const {
 }
 
 std::shared_ptr<ClientInfo> InputHandler::on_client_register(Socket socket) const {
-    socket << "Welcome to " << _server->name() << "! To exit, type '/quit'.\n";
     socket << "What is your name? ";
     std::string name{};
     while (!socket.readline([&name](std::string input) { name = input; }));
-
+    socket << "Welcome to " << _server->name() << "! To exit, type '/quit'. For commands, type '!help'.\r\n";
     return std::make_shared<ClientInfo>(std::move(socket),
             player::Player{ name, std::make_unique<GameData>(), std::make_unique<LobbyState>(*_ctx) });
 }

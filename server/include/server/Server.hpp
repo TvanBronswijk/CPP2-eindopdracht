@@ -38,6 +38,9 @@ namespace server {
 		void enqueue_command(input::Command command) { _queue.put(command); }
 		input::Command dequeue_command() { return input::Command{ _queue.get() }; }
 
+		ServerCallbackHandler& handler() { return *_handler; }
+		const ServerCallbackHandler& handler() const { return *_handler; }
+
 		ClientRegistry& registry() { return _registry; }
 		const ClientRegistry& registry() const { return _registry; }
 

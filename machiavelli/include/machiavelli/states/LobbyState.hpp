@@ -3,5 +3,5 @@
 
 class LobbyState : public BaseState {
 public:
-    LobbyState(Context& ctx) : BaseState{ctx, {}} {}
+    explicit LobbyState(Context& ctx);
 };

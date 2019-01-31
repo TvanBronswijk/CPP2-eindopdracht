@@ -4,10 +4,11 @@
 
 class InputHandler : public server::ServerCallbackHandler {
 public:
-    InputHandler(Context& ctx) : _ctx{ &ctx } {}
+    explicit InputHandler(Context& ctx) : _ctx{ &ctx } {}
     bool on_command(server::input::Command) const override;
     std::shared_ptr<server::ClientInfo> on_client_register(server::connection::Socket) const override;
     Event on_client_input(std::weak_ptr<server::ClientInfo>, std::string) const override;
+
 private:
     Context* _ctx;
 };
