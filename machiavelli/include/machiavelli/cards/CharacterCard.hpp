@@ -11,9 +11,9 @@ public:
     std::string name() const { return name_; }
 
     friend std::istream &operator>>(std::istream &str, CharacterCard &charactercard);
-    friend std::ostream &operator<<(std::ostream &str, CharacterCard &charactercard);
-    bool operator==(CharacterCard &card) { return card.name_ == this->name_; }
-    bool operator!=(CharacterCard &card) { return !(*this == card); }
+    friend std::ostream &operator<<(std::ostream &str, const CharacterCard &charactercard);
+    friend bool operator==(const CharacterCard& lhs, const CharacterCard& rhs);
+    friend bool operator!=(const CharacterCard& lhs, const CharacterCard& rhs);
 private:
     int order_;
     std::string name_;
@@ -33,7 +33,10 @@ inline std::istream &operator>>(std::istream &str, CharacterCard &character) {
     return str;
 }
 
-inline std::ostream &operator<<(std::ostream &str, CharacterCard &charactercard) {
+inline std::ostream &operator<<(std::ostream &str, const CharacterCard &charactercard) {
     str << (std::to_string(charactercard.order_) + ';' + charactercard.name_ + "\r\n");
     return str;
 }
+
+inline bool operator==(const CharacterCard &lhs, const CharacterCard& rhs) { return lhs.name_ == rhs.name_; }
+inline bool operator!=(const CharacterCard &lhs, const CharacterCard& rhs) { return !(lhs == rhs); }

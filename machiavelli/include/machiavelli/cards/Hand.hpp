@@ -21,7 +21,10 @@ public:
         remove(t);
         return result;
     }
-    T take_random() { return take(util::RAND.next(0, _cards.size())); }
+    T take_random() { return take(util::RAND.next(0, static_cast<int>(_cards.size()))); }
+
+    auto begin() { return _cards.begin(); }
+    auto end() { return _cards.end(); }
 private:
     std::vector<T> _cards;
 };

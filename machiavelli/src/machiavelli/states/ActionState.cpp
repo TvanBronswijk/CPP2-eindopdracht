@@ -47,7 +47,13 @@ ActionState::ActionState(Context &ctx) : BaseState(ctx, {
                 "Use your character's action.",
                 [](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
                 [&](StringArgs args, Player& player, Socket& socket, Context& context) {
-                    //TODO BIG
+                    if(!_character_action) {
+                        auto action = context.game().get_action(context.game().get_current_turn());
+                        action(player, socket, context);
+                        _character_action = true;
+                    }else {
+                        socket << "You already did your action this turn.";
+                    }
                 }
         },
         {
