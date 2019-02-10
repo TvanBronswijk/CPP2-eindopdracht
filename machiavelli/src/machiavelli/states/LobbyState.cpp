@@ -13,7 +13,11 @@ LobbyState::LobbyState(Context &ctx) : BaseState(ctx, {
                 [](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
                 [&](StringArgs args, Player& player, Socket& socket, Context& context) {
                     try {
-                        context.new_game().start();
+                        if(context.server().registry().size() == 2) {
+                            context.new_game().start(false);
+                        } else {
+                            socket << "Not enough players to start the game.\r\n";
+                        }
                     }catch(...) {
                         socket << "cannot start game. Did something go wrong?\r\n";
                     }

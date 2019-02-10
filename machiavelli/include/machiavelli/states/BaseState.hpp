@@ -8,7 +8,7 @@
 class BaseState : public server::player::state::State {
 public:
     BaseState(Context&, std::vector<server::command::Command<server::player::Player&, server::connection::Socket&, Context&>>);
-    virtual ~BaseState() = default;
+    ~BaseState() override = default;
     BaseState(const BaseState&) = delete;
     BaseState(BaseState&&) = delete;
     BaseState& operator=(const BaseState&) = delete;

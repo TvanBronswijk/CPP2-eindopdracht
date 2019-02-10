@@ -21,7 +21,11 @@ void run_game()
 
 	server->accept([&server](connection::Socket sock) {
 		(*server) << "A new connection from " << sock.get_dotted_ip() << " has been established.\n";
-		server->registry().register_client(*server, std::move(sock));
+		if(server->registry().size() < 2) {
+			server->registry().register_client(*server, std::move(sock));
+		} else {
+			sock << "Sorry, too many connections have been established already.";
+		}
 	});
 }
 

@@ -7,9 +7,9 @@
 
 class BuildingCard {
 public:
-    std::string get_name() { return name_; }
-    std::string get_color() { return color_; }
-    int get_coins() { return gold_coins_; }
+    std::string name() { return name_; }
+    std::string color() { return color_; }
+    int coins() { return gold_coins_; }
 
     friend std::istream &operator>>(std::istream &str, BuildingCard &building);
     friend std::ostream &operator<<(std::ostream &str, BuildingCard &building);
@@ -27,27 +27,17 @@ inline std::istream &operator>>(std::istream &str, BuildingCard &building) {
     std::string line;
     std::getline(str, line);
     std::stringstream lineStream(line);
-    std::string cell;
+    std::getline(lineStream, building.name_, ';');
 
-    for(int i = 0; std::getline(lineStream, cell, ';'); i++) {
-        switch (i) {
-            case 0:
-                building.name_ = cell;
-                break;
-            case 1:
-                building.gold_coins_ = std::stoi(cell);
-                break;
-            case 2:
-                building.color_ = cell;
-                break;
-            default:
-                break;
-        }
-    }
+    std::string gc;
+    std::getline(lineStream, gc, ';');
+    building.gold_coins_ = std::stoi(gc);
+
+    std::getline(lineStream, building.color_, ';');
     return str;
 }
 
 inline std::ostream &operator<<(std::ostream &str, BuildingCard &building) {
-    str << (building.name_ + "," + std::to_string(building.gold_coins_) + "," + building.color_ + ",\n");
+    str << (building.name_ + ';' + std::to_string(building.gold_coins_) + ';' + building.color_ + "\r\n");
     return str;
 }
