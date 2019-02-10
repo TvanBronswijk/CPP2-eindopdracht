@@ -3,6 +3,7 @@
 #include <server/player/state/State.hpp>
 #include <server/connection/Socket.hpp>
 #include <server/_command.hpp>
+#include "machiavelli/player/GameData.hpp"
 #include "machiavelli/Context.hpp"
 
 class BaseState : public server::player::state::State {

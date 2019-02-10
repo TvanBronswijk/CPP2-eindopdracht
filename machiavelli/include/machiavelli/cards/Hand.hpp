@@ -1,6 +1,7 @@
 #pragma once
 #include <initializer_list>
 #include <vector>
+#include "util.hpp"
 
 template<class T>
 class Hand {
@@ -20,6 +21,7 @@ public:
         remove(t);
         return result;
     }
+    T take_random() { return take(util::RAND.next(0, _cards.size())); }
 private:
     std::vector<T> _cards;
 };

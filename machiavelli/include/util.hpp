@@ -13,4 +13,6 @@ namespace util {
 	private:
 		std::default_random_engine _generator;
 	};
+
+	static Random RAND;
 }

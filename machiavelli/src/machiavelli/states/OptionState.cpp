@@ -6,4 +6,6 @@ using namespace server::command::validate;
 using namespace server::connection;
 using namespace server::player;
 
-OptionState::OptionState(Context &ctx) : BaseState(ctx, {}) {}
+OptionState::OptionState(Context &ctx) : BaseState(ctx, {
+        //TODO
+}) {}
