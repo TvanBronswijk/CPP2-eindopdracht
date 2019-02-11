@@ -3,21 +3,26 @@
 #include <functional>
 
 namespace server::command::options {
-	template<class T>
 	class OptionHandler {
 	public:
-		OptionHandler(std::vector<T*> vect, std::function<void(T&)> function) : options(vect), func_(function) {}
-		void choose(size_t choice) {
-			auto option = options.at(choice);
-			if (option) {
-				func_(*option);
-				return;
-			}
-			throw; //TODO throw exception
+		OptionHandler(std::vector<std::string> options, std::function<bool(int)> function)
+		: _options(std::move(options)), _func(std::move(function)) {}
+		bool choose(int choice) {
+			if(choice >= 0 && choice < _options.size())
+				return _func(choice);
+			else
+				throw; //TODO
 		}
+		friend std::ostream &operator<<(std::ostream &str, const OptionHandler &opt);
 	private:
-		std::function<void(T&)> func_;
-		std::vector<T*> options;
+		std::function<bool(int)> _func;
+		std::vector<std::string> _options;
 	};
+
+	inline std::ostream &operator<<(std::ostream &str, const OptionHandler &opt) {
+		for(int i = 0; i < opt._options.size(); i++)
+			str << '[' << std::to_string(i) << "] " << opt._options[i] << "\r\n";
+		return str;
+	}
 }
 

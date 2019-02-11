@@ -9,6 +9,7 @@ class CharacterCard {
 public:
     int order() const { return order_; }
     std::string name() const { return name_; }
+    std::string description() const { return std::to_string(order_) + ' ' + name_; }
 
     friend std::istream &operator>>(std::istream &str, CharacterCard &charactercard);
     friend std::ostream &operator<<(std::ostream &str, const CharacterCard &charactercard);

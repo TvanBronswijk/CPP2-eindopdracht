@@ -10,6 +10,8 @@ public:
     std::string name() const { return name_; }
     std::string color() const { return color_; }
     int coins() const { return gold_coins_; }
+    std::string description() const { return std::to_string(gold_coins_) + " Gold - " + name_ + "(" + color_ + ")"; }
+
 
     friend std::istream &operator>>(std::istream &str, BuildingCard &building);
     friend std::ostream &operator<<(std::ostream &str, const BuildingCard &building);
