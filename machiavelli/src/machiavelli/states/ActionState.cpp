@@ -82,7 +82,7 @@ ActionState::ActionState(Context &ctx) : BaseState(ctx, {
                 "End your turn.",
                 [](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
                 [&](StringArgs args, Player& player, Socket& socket, Context& context) {
-                    context.game().next_turn();
+                    context.game().next_turn(context);
                 }
         },
 }) {}

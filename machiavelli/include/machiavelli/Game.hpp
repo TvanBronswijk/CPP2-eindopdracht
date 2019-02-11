@@ -13,8 +13,8 @@ public:
     Game() = default;
     Game(std::weak_ptr<server::ClientInfo> player1, std::weak_ptr<server::ClientInfo> player2);
 
-    void start(bool);
-    void next_turn();
+    void start(Context&, bool);
+    void next_turn(Context&);
     void calculate_score();
 
     std::weak_ptr<server::ClientInfo> player_one() { return _player1; }
@@ -29,7 +29,7 @@ public:
             else
                 return player_two();
         } else {
-            //TODO
+            throw; //TODO
         }
     }
 

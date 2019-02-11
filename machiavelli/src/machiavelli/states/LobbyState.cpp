@@ -18,7 +18,7 @@ LobbyState::LobbyState(Context &ctx) : BaseState(ctx, {
                             context.new_game();
                             context.game().player_one().lock()->get_player().get_states().put(std::make_unique<IdleState>(*_ctx));
                             context.game().player_two().lock()->get_player().get_states().put(std::make_unique<IdleState>(*_ctx));
-                            context.game().start(false);
+                            context.game().start(context, false);
                         } else {
                             socket << "Not enough players to start the game.\r\n";
                         }
@@ -37,7 +37,7 @@ LobbyState::LobbyState(Context &ctx) : BaseState(ctx, {
                             context.new_game();
                             context.game().player_one().lock()->get_player().get_states().put(std::make_unique<IdleState>(*_ctx));
                             context.game().player_two().lock()->get_player().get_states().put(std::make_unique<IdleState>(*_ctx));
-                            context.game().start(true);
+                            context.game().start(context, true);
                         } else {
                             socket << "Not enough players to start the game.\r\n";
                         }

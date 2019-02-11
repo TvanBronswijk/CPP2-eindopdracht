@@ -8,7 +8,8 @@ class Hand {
 public:
     Hand() = default;
     Hand(std::initializer_list<T> cards) : _cards(cards) {}
-    void add(T& t) { _cards.push_back(t); }
+    void add(const T& t) { _cards.push_back(t); }
+    void add(T&& t) { _cards.push_back(t); }
     void remove(size_t i) { remove(_cards.at(i)); }
     void remove(T& t) { _cards.erase(std::remove(_cards.begin(), _cards.end(), t), _cards.end()); }
     T take(size_t i) {
@@ -21,7 +22,7 @@ public:
         remove(t);
         return result;
     }
-    T take_random() { return take(util::RAND.next(0, static_cast<int>(_cards.size()))); }
+    T take_random() { return take(util::RAND.next(0, static_cast<int>(_cards.size()-1))); }
 
     auto begin() { return _cards.begin(); }
     auto end() { return _cards.end(); }

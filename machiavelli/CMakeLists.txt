@@ -8,7 +8,6 @@ add_executable (machiavelli
 		"src/main.cpp"
 		"src/machiavelli/InputHandler.cpp"
 		"src/machiavelli/Game.cpp"
-        "src/machiavelli/io/IO.cpp"
 		"src/machiavelli/states/BaseState.cpp"
 		"src/machiavelli/states/LobbyState.cpp"
 		"src/machiavelli/states/IdleState.cpp"
