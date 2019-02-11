@@ -95,6 +95,8 @@ void Game::start(Context& ctx, bool random) {
     if(poneptr && ptwoptr) {
         auto& datone = poneptr->get_player().get_data<GameData>();
         auto& dattwo = ptwoptr->get_player().get_data<GameData>();
+        poneptr->get_socket() << "Game has started!\r\n";
+        ptwoptr->get_socket() << "Game has started!\r\n";
         if(random){
             datone.character_cards = Hand<CharacterCard>();
             dattwo.character_cards = Hand<CharacterCard>();
@@ -125,10 +127,12 @@ void Game::next_turn(Context& ctx) {
         player = game_order.at(++_curr_turn);
     }while(!player.lock() && _curr_turn <= 8);
     if(_curr_turn > 8){
+        calculate_score();
         start(ctx, false);
     }else {
         if(auto playerptr = player.lock()) {
             playerptr->get_player().get_states().put(std::make_unique<ActionState>(ctx));
+            playerptr->get_socket() << "It is your turn! You are the " << _ccards[_curr_turn].name() << "!\r\n";
         }
     }
 }

@@ -13,7 +13,7 @@ ActionState::ActionState(Context &ctx) : BaseState(ctx, {
                 [](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
                 [&](StringArgs args, Player& player, Socket& socket, Context& context) {
                     auto& data = player.get_data<GameData>();
-                    socket << "Gold: " << data.gold_coins;
+                    socket << "Gold: " << data.gold_coins << "\r\n";
                     socket << "Character Cards:\r\n";
                     std::for_each(data.character_cards.begin(), data.character_cards.end(), [&](CharacterCard& cc){
                         socket << cc.description()  << "\r\n";
@@ -36,8 +36,9 @@ ActionState::ActionState(Context &ctx) : BaseState(ctx, {
                     if(!_take_gold_or_card) {
                         player.get_data<GameData>().gold_coins += 2;
                         _take_gold_or_card = true;
+                        socket << "You recieved two gold!\r\n";
                     } else {
-                        socket << "You already took a card or gold this turn.";
+                        socket << "You already took a card or gold this turn.\r\n";
                     }
                 }
         },
@@ -50,8 +51,9 @@ ActionState::ActionState(Context &ctx) : BaseState(ctx, {
                         BuildingCard card = context.game().deck.take_random();
                         player.get_data<GameData>().building_cards.add(card);
                         _take_gold_or_card = true;
+                        socket << "You drew a " << card.name() << "!\r\n";
                     } else {
-                        socket << "You already took a card or gold this turn.";
+                        socket << "You already took a card or gold this turn.\r\n";
                     }
                 }
         },
@@ -64,8 +66,9 @@ ActionState::ActionState(Context &ctx) : BaseState(ctx, {
                         auto action = context.game().get_action(context.game().get_current_turn());
                         action(player, socket, context);
                         _character_action = true;
+                        socket << "your action has triggered...\r\n";
                     }else {
-                        socket << "You already did your action this turn.";
+                        socket << "You already did your action this turn.\r\n";
                     }
                 }
         },
@@ -82,6 +85,7 @@ ActionState::ActionState(Context &ctx) : BaseState(ctx, {
                 "End your turn.",
                 [](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
                 [&](StringArgs args, Player& player, Socket& socket, Context& context) {
+                    socket << "You finished your turn!\r\n";
                     context.game().next_turn(context);
                 }
         },
