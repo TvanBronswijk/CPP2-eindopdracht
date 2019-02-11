@@ -17,6 +17,9 @@ public:
     void next_turn();
     void calculate_score();
 
+    std::weak_ptr<server::ClientInfo> player_one() { return _player1; }
+    std::weak_ptr<server::ClientInfo> player_two() { return _player2; }
+
     size_t get_current_turn() { return _curr_turn; }
     CharacterCard get_card(size_t index) { return _ccards.at(index); }
     CharacterAction get_action(size_t index) { return _cactions.at(index); }

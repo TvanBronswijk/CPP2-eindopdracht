@@ -1,6 +1,7 @@
 #include <machiavelli/Game.hpp>
 #include <machiavelli/Context.hpp>
 #include <machiavelli/player/GameData.hpp>
+#include <machiavelli/states/IdleState.hpp>
 
 using namespace server;
 using namespace server::connection;
@@ -8,8 +9,6 @@ using namespace server::player;
 
 Game::Game(std::weak_ptr<server::ClientInfo> player1, std::weak_ptr<server::ClientInfo> player2)
         : _player1(std::move(player1)), _player2(std::move(player2)), _curr_turn(1) {
-
-
     _cactions = {
             {1, [](Player &player, Socket &socket, Context &context) { //moordenaar
                 auto &data = player.get_data<GameData>();

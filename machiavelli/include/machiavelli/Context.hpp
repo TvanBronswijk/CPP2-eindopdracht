@@ -17,7 +17,7 @@ public:
         return server();
     }
     Game& new_game() {
-        _game = std::make_unique<Game>();
+        _game = std::make_unique<Game>(_server->registry()[0], _server->registry()[1]);
         return game();
     }
 private:
