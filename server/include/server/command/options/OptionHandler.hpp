@@ -13,13 +13,14 @@ namespace server::command::options {
 			else
 				throw; //TODO
 		}
-		friend std::ostream &operator<<(std::ostream &str, const OptionHandler &opt);
+
+		template<class Stream> friend Stream &operator<<(Stream &str, const OptionHandler &opt);
 	private:
 		std::function<bool(int)> _func;
 		std::vector<std::string> _options;
 	};
 
-	inline std::ostream &operator<<(std::ostream &str, const OptionHandler &opt) {
+	template<class Stream> inline Stream &operator<<(Stream &str, const OptionHandler &opt) {
 		for(int i = 0; i < opt._options.size(); i++)
 			str << '[' << std::to_string(i) << "] " << opt._options[i] << "\r\n";
 		return str;

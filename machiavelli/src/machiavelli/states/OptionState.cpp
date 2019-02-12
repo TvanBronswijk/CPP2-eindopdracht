@@ -16,13 +16,17 @@ OptionState::OptionState(Context &ctx, OptionHandler handler) : BaseState(ctx, {
 bool OptionState::handle(server::input::Command cmd) {
     if(auto ptr = cmd.get_client_info().lock()) {
         try {
-            int i = std::stoi(cmd.get_cmd());
-            if(_handler.choose(i)) {
-                ptr->get_player().get_states().pop();
-                return true;
+            if(cmd.get_cmd().length() >= 2) {
+                std::string num = cmd.get_cmd();
+                num.erase(std::remove(num.begin(), num.end(), '!'), num.end());
+                int i = std::stoi(num);
+                if(_handler.choose(i)) {
+                    ptr->get_player().get_states().pop();
+                    return true;
+                }
             }
         }catch(...) {
-            ptr->get_socket() << "Something went wrong.\r\n";
+            BaseState::handle(cmd);
         }
     }
     return false;
