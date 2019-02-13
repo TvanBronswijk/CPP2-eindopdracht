@@ -14,6 +14,8 @@ public:
     Game(std::weak_ptr<server::ClientInfo> player1, std::weak_ptr<server::ClientInfo> player2);
 
     void start(Context&, bool);
+    void draw_random(Context&);
+    void draw_order(Context&);
     void next_turn(Context&);
     void calculate_score();
 

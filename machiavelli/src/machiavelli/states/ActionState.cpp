@@ -1,12 +1,15 @@
 #include "machiavelli/states/ActionState.hpp"
+#include "machiavelli/states/OptionState.hpp"
 
 using namespace server;
 using namespace server::command;
+using namespace server::command::options;
 using namespace server::command::validate;
 using namespace server::connection;
 using namespace server::player;
 
-ActionState::ActionState(Context &ctx) : BaseState(ctx, {
+ActionState::ActionState(Context &ctx) : _take_gold_or_card(false), _character_action(false), _built_building(false),
+BaseState(ctx, {
         {
                 "info",
                 "Get your current character info.",
@@ -77,7 +80,30 @@ ActionState::ActionState(Context &ctx) : BaseState(ctx, {
                 "Build a card from your hand.",
                 [](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
                 [&](StringArgs args, Player& player, Socket& socket, Context& context) {
-                    //TODO
+                    if(!_built_building) {
+                        auto& data = player.get_data<GameData>();
+                        std::vector<std::string> options;
+                        std::transform(data.building_cards.begin(), data.building_cards.end(), std::back_inserter(options), [](BuildingCard& bc){
+                            return bc.name();
+                        });
+                        OptionHandler handler{options, [&](int i) -> bool {
+                            BuildingCard b = data.building_cards.take(i);
+                            if(data.gold_coins >= b.coins()) {
+                                socket << "You built a " << b.name() << "!\r\n";
+                                data.gold_coins -= b.coins();
+                                data.built_buildings.add(b);
+                                _built_building = true;
+                            } else {
+                                data.building_cards.add(b);
+                                socket << "You can't afford that!\r\n";
+                            }
+                            return true;
+                        }};
+                        socket << handler;
+                        player.get_states().put(std::make_unique<OptionState>(context, handler));
+                    } else {
+                        socket << "You cannot build anymore!";
+                    }
                 }
         },
         {

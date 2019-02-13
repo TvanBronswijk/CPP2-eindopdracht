@@ -82,6 +82,30 @@ Game::Game(std::weak_ptr<server::ClientInfo> player1, std::weak_ptr<server::Clie
 }
 
 void Game::start(Context &ctx, bool random) {
+    auto poneptr = player_one().lock();
+    auto ptwoptr = player_two().lock();
+    if (poneptr && ptwoptr) {
+        auto &datone = poneptr->get_player().get_data<GameData>();
+        auto &dattwo = ptwoptr->get_player().get_data<GameData>();
+        datone.gold_coins = 2;
+        dattwo.gold_coins = 2;
+        for (int i = 0; i < 4; ++i) {
+            datone.building_cards.add(deck.take_random());
+            dattwo.building_cards.add(deck.take_random());
+        }
+        poneptr->get_socket() << "Game has started!\r\n";
+        ptwoptr->get_socket() << "Game has started!\r\n";
+        if (random) {
+            draw_random(ctx);
+        } else {
+            draw_order(ctx);
+        }
+    } else {
+        throw -1;
+    }
+}
+
+void Game::draw_random(Context &ctx) {
     character_cards = Hand<CharacterCard>();
     std::for_each(_ccards.begin(), _ccards.end(), [&](auto &pair) {
         character_cards.add(pair.second);
@@ -92,58 +116,71 @@ void Game::start(Context &ctx, bool random) {
     if (poneptr && ptwoptr) {
         auto &datone = poneptr->get_player().get_data<GameData>();
         auto &dattwo = ptwoptr->get_player().get_data<GameData>();
-        poneptr->get_socket() << "Game has started!\r\n";
-        ptwoptr->get_socket() << "Game has started!\r\n";
-        if (random) {
-            datone.character_cards = Hand<CharacterCard>();
-            dattwo.character_cards = Hand<CharacterCard>();
-            auto cc = character_cards.take_random();
-            game_order[cc.order()] = poneptr;
-            datone.character_cards.add(std::move(cc));
-            cc = character_cards.take_random();
-            game_order[cc.order()] = ptwoptr;
-            dattwo.character_cards.add(std::move(cc));
-            cc = character_cards.take_random();
-            game_order[cc.order()] = poneptr;
-            datone.character_cards.add(std::move(cc));
-            cc = character_cards.take_random();
-            game_order[cc.order()] = ptwoptr;
-            dattwo.character_cards.add(std::move(cc));
-            next_turn(ctx);
-        } else {
-            character_cards.take_random();
-
-            OptionHandler handler {
-                    {},
-                    [&](int i){
-                        if(character_cards.size() % 2 == 0){
-
-                        }else{
-
-                        }
-                        return true;
-                    }
-            };
-            if(auto kingptr = _king.lock()){
-                kingptr->get_player().get_states().put(std::make_unique<OptionState>(ctx, handler));
-            }
-        }
+        datone.character_cards = Hand<CharacterCard>();
+        dattwo.character_cards = Hand<CharacterCard>();
+        auto cc = character_cards.take_random();
+        game_order[cc.order()] = poneptr;
+        datone.character_cards.add(std::move(cc));
+        cc = character_cards.take_random();
+        game_order[cc.order()] = ptwoptr;
+        dattwo.character_cards.add(std::move(cc));
+        cc = character_cards.take_random();
+        game_order[cc.order()] = poneptr;
+        datone.character_cards.add(std::move(cc));
+        cc = character_cards.take_random();
+        game_order[cc.order()] = ptwoptr;
+        dattwo.character_cards.add(std::move(cc));
+        next_turn(ctx);
     } else {
         throw -1;
     }
 }
+
+void Game::draw_order(Context &ctx) {
+    character_cards = Hand<CharacterCard>();
+    std::for_each(_ccards.begin(), _ccards.end(), [&](auto &pair) {
+        character_cards.add(pair.second);
+    });
+
+    auto poneptr = player_one().lock();
+    auto ptwoptr = player_two().lock();
+    if (poneptr && ptwoptr) {
+        auto &datone = poneptr->get_player().get_data<GameData>();
+        auto &dattwo = ptwoptr->get_player().get_data<GameData>();
+
+        character_cards.take_random(); //throw away first
+        OptionHandler handler{
+                {},
+                [&](int i) {
+                    if (character_cards.size() % 2 == 0) {
+
+                    } else {
+
+                    }
+                    return true;
+                }
+        };
+        if (auto kingptr = _king.lock()) {
+            kingptr->get_player().get_states().put(std::make_unique<OptionState>(ctx, handler));
+        }
+
+    } else {
+        throw -1;
+    }
+}
+
 
 void Game::next_turn(Context &ctx) {
     std::weak_ptr<ClientInfo> player;
 
     do {
         auto it = game_order.find(++_curr_turn);
-        if(it != game_order.end())
+        if (it != game_order.end())
             player = (*it).second;
     } while (!player.lock() && _curr_turn <= 8);
     if (_curr_turn > 8) {
         calculate_score();
-        start(ctx, false);
+        draw_order(ctx);
     } else {
         if (auto playerptr = player.lock()) {
             playerptr->get_player().get_states().put(std::make_unique<ActionState>(ctx));
@@ -154,4 +191,10 @@ void Game::next_turn(Context &ctx) {
 
 void Game::calculate_score() {
     //TODO
+
+    bool game_end = false;
+    if(game_end) {
+        player_one().lock()->get_player().get_states().pop();
+        player_two().lock()->get_player().get_states().pop();
+    }
 }
