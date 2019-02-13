@@ -20,6 +20,7 @@ bool CharacterCardPickingState::handle(server::input::Command cmd) {
 }
 
 bool CharacterCardPickingState::pick_card(std::weak_ptr<server::ClientInfo> client, int i) {
+	auto& ctx = *_ctx;
     if(i < 0 || i >= _ctx->game().character_cards.size()) return false;
 
     if(auto clientptr = client.lock()) {
@@ -31,13 +32,13 @@ bool CharacterCardPickingState::pick_card(std::weak_ptr<server::ClientInfo> clie
             auto other = _ctx->game().other_player(clientptr->get_player());
             if(_ctx->game().character_cards.size() == 0) {
                 clientptr->get_player().get_states().pop();
-                _ctx->game().next_turn(*_ctx); return true; }
+                ctx.game().next_turn(ctx); return true; }
             if(auto otherptr = other.lock()) {
                 otherptr->get_socket() << "Pick one to drop:\r\n";
                 for(int i = 0; i < _ctx->game().character_cards.size(); i++)
                     otherptr->get_socket() << '[' << std::to_string(i) << "] " << _ctx->game().character_cards.peek(i).name() << "\r\n";
                 clientptr->get_player().get_states().pop();
-                otherptr->get_player().get_states().put(std::make_unique<CharacterCardPickingState>(*_ctx, false));
+                otherptr->get_player().get_states().put(std::make_unique<CharacterCardPickingState>(ctx, false));
             }
         } else {
             _ctx->game().character_cards.take(i);
@@ -48,7 +49,7 @@ bool CharacterCardPickingState::pick_card(std::weak_ptr<server::ClientInfo> clie
             for(int i = 0; i < _ctx->game().character_cards.size(); i++)
                 clientptr->get_socket() << '[' << std::to_string(i) << "] " << _ctx->game().character_cards.peek(i).name() << "\r\n";
             clientptr->get_player().get_states().pop();
-            clientptr->get_player().get_states().put(std::make_unique<CharacterCardPickingState>(*_ctx, true));
+            clientptr->get_player().get_states().put(std::make_unique<CharacterCardPickingState>(ctx, true));
         }
     }
     return true;

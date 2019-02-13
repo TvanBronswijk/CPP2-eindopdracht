@@ -2,10 +2,6 @@
 cmake_minimum_required (VERSION 3.8)
 project(server)
 
-if(MSVC)
-	add_compile_options(/W3)
-endif(MSVC)
-
 add_library (server STATIC
 		"src/server/connection/Socket.cpp"
 		"src/server/ClientRegistry.cpp"
