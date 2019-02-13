@@ -8,7 +8,7 @@ using namespace server::command::validate;
 using namespace server::connection;
 using namespace server::player;
 
-ActionState::ActionState(Context &ctx) : _take_gold_or_card(false), _character_action(false), _built_building(false),
+ActionState::ActionState(Context &ctx) : _take_gold_or_card(false), _character_action(false), _built_building(false), _built_buildings(0),
 BaseState(ctx, {
         {
                 "info",
@@ -92,7 +92,14 @@ BaseState(ctx, {
                                 socket << "You built a " << b.name() << "!\r\n";
                                 data.gold_coins -= b.coins();
                                 data.built_buildings.add(b);
-                                _built_building = true;
+                                if(context.game().get_card(context.game().get_current_turn()).name() == "Bouwmeester") {
+                                    _built_buildings++;
+                                    if(_built_buildings >= 3) {
+                                        _built_building = true;
+                                    }
+                                } else {
+                                    _built_building = true;
+                                }
                             } else {
                                 data.building_cards.add(b);
                                 socket << "You can't afford that!\r\n";

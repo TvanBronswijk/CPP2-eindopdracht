@@ -7,5 +7,6 @@ public:
 private:
     bool _take_gold_or_card;
     bool _built_building;
+    int _built_buildings;
     bool _character_action;
 };

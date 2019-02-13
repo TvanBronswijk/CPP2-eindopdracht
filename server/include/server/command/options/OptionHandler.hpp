@@ -11,7 +11,7 @@ namespace server::command::options {
 			if(choice >= 0 && choice < _options.size())
 				return _func(choice);
 			else
-				throw; //TODO
+				throw;
 		}
 
 		template<class Stream> friend Stream &operator<<(Stream &str, const OptionHandler &opt);

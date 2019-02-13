@@ -61,6 +61,7 @@ Game::Game(std::weak_ptr<server::ClientInfo> player1, std::weak_ptr<server::Clie
             {4, [](Player &player, Socket &socket, Context &context) { //koning
                 auto &data = player.get_data<GameData>();
                 data.gold_coins += data.count_color("geel");
+                context.game()._king = context.game().other_player(context.game().other_player(player).lock()->get_player());
             }},
             {5, [](Player &player, Socket &socket, Context &context) { //prediker
                 auto &data = player.get_data<GameData>();
@@ -73,11 +74,36 @@ Game::Game(std::weak_ptr<server::ClientInfo> player1, std::weak_ptr<server::Clie
             }},
             {7, [](Player &player, Socket &socket, Context &context) { //bouwman
                 auto &data = player.get_data<GameData>();
-                //TODO
+                BuildingCard card = context.game().deck.take_random();
+                player.get_data<GameData>().building_cards.add(card);
+                socket << "You drew a " << card.name() << "!\r\n";
             }},
             {8, [](Player &player, Socket &socket, Context &context) { //condotiere
                 auto &data = player.get_data<GameData>();
-                //TODO
+                data.gold_coins += data.count_color("rood");
+
+                if(auto otherptr = context.game().other_player(player).lock()) {
+                    auto& otherdat = otherptr->get_player().get_data<GameData>();
+                    if(otherdat.built_buildings.size() <= 0 || otherdat.built_buildings.size() >= 8) {
+                        socket << "You cannot destroy anything.";
+                        return;
+                    }
+                    std::vector<std::string> options;
+                    std::transform(otherdat.built_buildings.begin(), otherdat.built_buildings.end(), std::back_inserter(options),
+                            [](BuildingCard& bc){
+                        return bc.name();
+                    });
+                    OptionHandler handler{
+                            options,
+                            [&](int i) {
+                                auto card = otherdat.built_buildings.take(i);
+                                data.gold_coins -= card.coins() - 1;
+                                return true;
+                            }
+                    };
+                    socket << handler;
+                    player.get_states().put(std::make_unique<OptionState>(context, handler));
+                }
             }}
     };
 }
@@ -174,6 +200,7 @@ void Game::next_turn(Context &ctx) {
         if(!calculate_score(ctx)) {
             player_one().lock()->get_player().get_data<GameData>().character_cards.clear();
             player_two().lock()->get_player().get_data<GameData>().character_cards.clear();
+            game_order.clear();
             draw_order(ctx);
             _curr_turn = 0;
         }

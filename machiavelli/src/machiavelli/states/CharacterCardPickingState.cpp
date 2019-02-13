@@ -29,7 +29,9 @@ bool CharacterCardPickingState::pick_card(std::weak_ptr<server::ClientInfo> clie
             _ctx->game().game_order[card.order()] = clientptr;
             data.character_cards.add(card);
             auto other = _ctx->game().other_player(clientptr->get_player());
-            if(_ctx->game().character_cards.size() == 0) {_ctx->game().next_turn(*_ctx); return true; }
+            if(_ctx->game().character_cards.size() == 0) {
+                clientptr->get_player().get_states().pop();
+                _ctx->game().next_turn(*_ctx); return true; }
             if(auto otherptr = other.lock()) {
                 otherptr->get_socket() << "Pick one to drop:\r\n";
                 for(int i = 0; i < _ctx->game().character_cards.size(); i++)
@@ -39,7 +41,9 @@ bool CharacterCardPickingState::pick_card(std::weak_ptr<server::ClientInfo> clie
             }
         } else {
             _ctx->game().character_cards.take(i);
-            if(_ctx->game().character_cards.size() == 0) {_ctx->game().next_turn(*_ctx); return true; }
+            if(_ctx->game().character_cards.size() == 0) {
+                clientptr->get_player().get_states().pop();
+                _ctx->game().next_turn(*_ctx); return true; }
             clientptr->get_socket() << "Pick one to take:\r\n";
             for(int i = 0; i < _ctx->game().character_cards.size(); i++)
                 clientptr->get_socket() << '[' << std::to_string(i) << "] " << _ctx->game().character_cards.peek(i).name() << "\r\n";

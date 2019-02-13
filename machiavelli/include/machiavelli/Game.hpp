@@ -31,7 +31,7 @@ public:
             else
                 return player_one();
         } else {
-            throw; //TODO
+            throw;
         }
     }
 
