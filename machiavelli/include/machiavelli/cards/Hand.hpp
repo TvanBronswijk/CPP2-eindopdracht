@@ -8,6 +8,7 @@ class Hand {
 public:
     Hand() = default;
     Hand(std::initializer_list<T> cards) : _cards(cards) {}
+    Hand(std::vector<T> cards) : _cards(cards) {}
     void add(const T& t) { _cards.push_back(t); }
     void add(T&& t) { _cards.push_back(t); }
     void remove(size_t i) { remove(_cards.at(i)); }
@@ -26,6 +27,7 @@ public:
 
     auto begin() { return _cards.begin(); }
     auto end() { return _cards.end(); }
+    auto size() { return _cards.size(); }
 private:
     std::vector<T> _cards;
 };

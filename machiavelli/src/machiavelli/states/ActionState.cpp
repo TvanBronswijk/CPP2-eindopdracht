@@ -86,6 +86,7 @@ ActionState::ActionState(Context &ctx) : BaseState(ctx, {
                 [](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
                 [&](StringArgs args, Player& player, Socket& socket, Context& context) {
                     socket << "You finished your turn!\r\n";
+                    player.get_states().pop();
                     context.game().next_turn(context);
                 }
         },

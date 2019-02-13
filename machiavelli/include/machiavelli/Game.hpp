@@ -43,6 +43,7 @@ public:
     std::unordered_map<size_t, std::weak_ptr<server::ClientInfo>> game_order;
 private:
     size_t _curr_turn;
+    std::weak_ptr<server::ClientInfo> _king;
     std::weak_ptr<server::ClientInfo> _player1;
     std::weak_ptr<server::ClientInfo> _player2;
     std::unordered_map<size_t, CharacterCard> _ccards;
