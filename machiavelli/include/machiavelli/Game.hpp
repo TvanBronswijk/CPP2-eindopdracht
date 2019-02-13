@@ -27,9 +27,9 @@ public:
         auto ptwoptr = player_two().lock();
         if(poneptr && ptwoptr) {
             if(poneptr->get_player().get_name() == player.get_name())
-                return player_one();
-            else
                 return player_two();
+            else
+                return player_one();
         } else {
             throw; //TODO
         }

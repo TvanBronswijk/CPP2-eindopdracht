@@ -102,7 +102,7 @@ BaseState(ctx, {
                         socket << handler;
                         player.get_states().put(std::make_unique<OptionState>(context, handler));
                     } else {
-                        socket << "You cannot build anymore!";
+                        socket << "You cannot build anymore!\r\n";
                     }
                 }
         },

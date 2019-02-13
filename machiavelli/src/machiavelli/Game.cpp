@@ -3,6 +3,7 @@
 #include <machiavelli/player/GameData.hpp>
 #include <machiavelli/states/IdleState.hpp>
 #include <machiavelli/states/OptionState.hpp>
+#include <machiavelli/states/CharacterCardPickingState.hpp>
 #include <machiavelli/states/ActionState.hpp>
 #include <server/command/_options.hpp>
 #include <util.hpp>
@@ -147,21 +148,12 @@ void Game::draw_order(Context &ctx) {
     if (poneptr && ptwoptr) {
         auto &datone = poneptr->get_player().get_data<GameData>();
         auto &dattwo = ptwoptr->get_player().get_data<GameData>();
-
         character_cards.take_random(); //throw away first
-        OptionHandler handler{
-                {},
-                [&](int i) {
-                    if (character_cards.size() % 2 == 0) {
-
-                    } else {
-
-                    }
-                    return true;
-                }
-        };
         if (auto kingptr = _king.lock()) {
-            kingptr->get_player().get_states().put(std::make_unique<OptionState>(ctx, handler));
+            kingptr->get_socket() << "Pick one to draw:\r\n";
+            for(int i = 0; i < character_cards.size(); i++)
+                kingptr->get_socket() << '[' << std::to_string(i) << "] " << character_cards.peek(i).name() << "\r\n";
+            kingptr->get_player().get_states().put(std::make_unique<CharacterCardPickingState>(ctx, true));
         }
 
     } else {
@@ -180,7 +172,10 @@ void Game::next_turn(Context &ctx) {
     } while (!player.lock() && _curr_turn <= 8);
     if (_curr_turn > 8) {
         calculate_score();
+        player_one().lock()->get_player().get_data<GameData>().character_cards.clear();
+        player_two().lock()->get_player().get_data<GameData>().character_cards.clear();
         draw_order(ctx);
+        _curr_turn = 0;
     } else {
         if (auto playerptr = player.lock()) {
             playerptr->get_player().get_states().put(std::make_unique<ActionState>(ctx));

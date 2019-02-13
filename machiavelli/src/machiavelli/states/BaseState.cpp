@@ -15,6 +15,7 @@ BaseState::BaseState(Context& ctx, std::vector<command::Command<Player&, Socket&
         "Get description of all commands.",
         [](StringArgs args) { return validate_that<StringArgs>(args, is_empty<std::string>); },
         [&](StringArgs args, Player& player, Socket& socket, Context& context) {
+            socket << "Commands are prefixed with a '!' (including numbered options).\r\n";
             _cmds.help(socket);
         });
     _cmds = { '!', commands };

@@ -9,9 +9,8 @@ using namespace server::command::validate;
 using namespace server::connection;
 using namespace server::player;
 
-OptionState::OptionState(Context &ctx, OptionHandler handler) : BaseState(ctx, {
-        //TODO
-}), _handler(std::move(handler)) {}
+OptionState::OptionState(Context &ctx, OptionHandler handler)
+: BaseState(ctx, {}), _handler(std::move(handler)) {}
 
 bool OptionState::handle(server::input::Command cmd) {
     if(auto ptr = cmd.get_client_info().lock()) {

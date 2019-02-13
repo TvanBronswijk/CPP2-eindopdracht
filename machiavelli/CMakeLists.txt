@@ -12,7 +12,8 @@ add_executable (machiavelli
 		"src/machiavelli/states/LobbyState.cpp"
 		"src/machiavelli/states/IdleState.cpp"
 		"src/machiavelli/states/ActionState.cpp"
-		"src/machiavelli/states/OptionState.cpp")
+		"src/machiavelli/states/OptionState.cpp"
+		"src/machiavelli/states/CharacterCardPickingState.cpp")
 
 target_compile_features(machiavelli PUBLIC cxx_std_17)
 target_link_libraries(machiavelli PRIVATE server)
