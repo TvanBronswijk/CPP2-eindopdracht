@@ -56,7 +56,28 @@ Game::Game(std::weak_ptr<server::ClientInfo> player1, std::weak_ptr<server::Clie
             }},
             {3, [](Player &player, Socket &socket, Context &context) { //magier
                 auto &data = player.get_data<GameData>();
-                //TODO
+                OptionHandler handler{
+                        {"Wissel kaarten met andere speler", "Wissel kaarten met de bank"},
+                        [&](int i) {
+                            if(i == 0) {
+                                if(auto otherptr = context.game().other_player(player).lock()) {
+                                    auto &otherdat = otherptr->get_player().get_data<GameData>();
+                                    auto tmpdeck = otherdat.building_cards;
+                                    otherdat.building_cards = data.building_cards;
+                                    data.building_cards = tmpdeck;
+                                }
+                            }else if (i == 1) {
+                                auto size = data.building_cards.size();
+                                data.building_cards.clear();
+                                for(int index = 0; index < size; index++) {
+                                    data.building_cards.add(context.game().deck.take_random());
+                                }
+                            }
+                            return true;
+                        }
+                };
+                socket << handler;
+                player.get_states().put(std::make_unique<OptionState>(context, handler));
             }},
             {4, [](Player &player, Socket &socket, Context &context) { //koning
                 auto &data = player.get_data<GameData>();

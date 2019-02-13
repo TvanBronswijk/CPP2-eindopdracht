@@ -18,7 +18,7 @@ namespace io {
             }
             file.close();
 		}catch(...){
-		    std::cerr << "Something went wrong during file parsing.";
+		    std::cerr << "Something went wrong during file parsing.\r\n";
 		}
 		return result;
 	}
