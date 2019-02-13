@@ -171,11 +171,12 @@ void Game::next_turn(Context &ctx) {
             player = (*it).second;
     } while (!player.lock() && _curr_turn <= 8);
     if (_curr_turn > 8) {
-        calculate_score();
-        player_one().lock()->get_player().get_data<GameData>().character_cards.clear();
-        player_two().lock()->get_player().get_data<GameData>().character_cards.clear();
-        draw_order(ctx);
-        _curr_turn = 0;
+        if(!calculate_score(ctx)) {
+            player_one().lock()->get_player().get_data<GameData>().character_cards.clear();
+            player_two().lock()->get_player().get_data<GameData>().character_cards.clear();
+            draw_order(ctx);
+            _curr_turn = 0;
+        }
     } else {
         if (auto playerptr = player.lock()) {
             playerptr->get_player().get_states().put(std::make_unique<ActionState>(ctx));
@@ -184,12 +185,34 @@ void Game::next_turn(Context &ctx) {
     }
 }
 
-void Game::calculate_score() {
-    //TODO
-
-    bool game_end = false;
-    if(game_end) {
-        player_one().lock()->get_player().get_states().pop();
-        player_two().lock()->get_player().get_states().pop();
-    }
+int calculate_building_score(Hand<BuildingCard> &bchand) {
+    int result = 0;
+    std::for_each(bchand.begin(), bchand.end(), [&](BuildingCard& bc){
+        result += bc.coins();
+    });
+    if(bchand.size() >= 8) result += 4;
+    return result;
 }
+
+bool Game::calculate_score(Context& ctx) {
+    auto poneptr = player_one().lock();
+    auto ptwoptr = player_two().lock();
+    if (poneptr && ptwoptr) {
+        auto &datone = poneptr->get_player().get_data<GameData>();
+        auto &dattwo = ptwoptr->get_player().get_data<GameData>();
+        if(datone.built_buildings.size() >= 8 || dattwo.built_buildings.size() >= 8) {
+            int scorepone = calculate_building_score(datone.built_buildings);
+            int scoreptwo = calculate_building_score(dattwo.built_buildings);
+
+            poneptr->get_socket() << "You " << ((scorepone > scoreptwo) ? "Won!" : "Lost. ") << std::to_string(scorepone);
+            ptwoptr->get_socket() << "You " << ((scoreptwo > scorepone) ? "Won!" : "Lost. ") << std::to_string(scoreptwo);
+
+            player_one().lock()->get_player().get_states().pop();
+            player_two().lock()->get_player().get_states().pop();
+            return true;
+        }
+    }
+    return false;
+}
+
+

@@ -17,7 +17,7 @@ public:
     void draw_random(Context&);
     void draw_order(Context&);
     void next_turn(Context&);
-    void calculate_score();
+    bool calculate_score(Context&);
 
     std::weak_ptr<server::ClientInfo> player_one() { return _player1; }
     std::weak_ptr<server::ClientInfo> player_two() { return _player2; }
