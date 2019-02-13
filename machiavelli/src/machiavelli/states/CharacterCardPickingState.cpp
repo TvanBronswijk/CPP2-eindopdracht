@@ -13,7 +13,7 @@ bool CharacterCardPickingState::handle(server::input::Command cmd) {
                 return pick_card(cmd.get_client_info(), i);
             }
         }catch(...) {
-            BaseState::handle(cmd);
+            return BaseState::handle(cmd);
         }
     }
     return false;

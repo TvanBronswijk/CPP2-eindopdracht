@@ -7,7 +7,8 @@
 
 class CharacterCard {
 public:
-    int order() const { return order_; }
+	CharacterCard() : order_(0) {}
+	int order() const { return order_; }
     std::string name() const { return name_; }
     std::string description() const { return std::to_string(order_) + ' ' + name_; }
 
@@ -22,16 +23,24 @@ private:
 
 
 inline std::istream &operator>>(std::istream &str, CharacterCard &character) {
-    std::string line;
-    std::getline(str, line);
-    std::stringstream lineStream(line);
+	std::string         line;
+	std::getline(str, line);
 
-    std::string ord;
-    std::getline(lineStream, ord, ';');
-    character.order_ = std::stoi(ord);
+	std::stringstream   lineStream(line);
+	std::string         cell;
 
-    std::getline(lineStream, character.name_, ';');
-    return str;
+	for (int i = 0;std::getline(lineStream, cell, ';'); i++)
+	{
+		switch (i) {
+		case 0:
+			character.order_ = std::stoi(cell);
+			break;
+		case 1:
+			character.name_ = cell;
+			break;
+		}
+	}
+	return str;
 }
 
 inline std::ostream &operator<<(std::ostream &str, const CharacterCard &charactercard) {

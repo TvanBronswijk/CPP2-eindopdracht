@@ -57,7 +57,7 @@ Game::Game(std::weak_ptr<server::ClientInfo> player1, std::weak_ptr<server::Clie
             {3, [](Player &player, Socket &socket, Context &context) { //magier
                 auto &data = player.get_data<GameData>();
                 OptionHandler handler{
-                        {"Wissel kaarten met andere speler", "Wissel kaarten met de bank"},
+                        {"Swap cards", "Exchange cards with bank"},
                         [&](int i) {
                             if(i == 0) {
                                 if(auto otherptr = context.game().other_player(player).lock()) {

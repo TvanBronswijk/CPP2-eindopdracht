@@ -4,4 +4,5 @@
 class IdleState : public BaseState {
 public:
     explicit IdleState(Context& ctx);
+	~IdleState() override = default;
 };

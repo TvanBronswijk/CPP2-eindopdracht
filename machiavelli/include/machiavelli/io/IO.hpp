@@ -16,11 +16,12 @@ namespace io {
             while (file >> card) {
                 result.push_back(std::move(card));
             }
-            file.close();
+			file.close();
 		}catch(...){
 		    std::cerr << "Something went wrong during file parsing.\r\n";
+			file.close();
 		}
-		return result;
+		return std::move(result);
 	}
 
 	template<class T>

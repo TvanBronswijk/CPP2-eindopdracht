@@ -26,17 +26,27 @@ private:
 
 
 inline std::istream &operator>>(std::istream &str, BuildingCard &building) {
-    std::string line;
-    std::getline(str, line);
-    std::stringstream lineStream(line);
-    std::getline(lineStream, building.name_, ';');
+	std::string         line;
+	std::getline(str, line);
 
-    std::string gc;
-    std::getline(lineStream, gc, ';');
-    building.gold_coins_ = std::stoi(gc);
+	std::stringstream   lineStream(line);
+	std::string         cell;
 
-    std::getline(lineStream, building.color_, ';');
-    return str;
+	for (int i = 0; std::getline(lineStream, cell, ';'); i++)
+	{
+		switch (i) {
+		case 0:
+			building.name_ = cell;
+			break;
+		case 1:
+			building.gold_coins_ = std::stoi(cell);
+			break;
+		case 2:
+			building.color_ = cell;
+			break;
+		}
+	}
+	return str;
 }
 
 inline std::ostream &operator<<(std::ostream &str, const BuildingCard &building) {

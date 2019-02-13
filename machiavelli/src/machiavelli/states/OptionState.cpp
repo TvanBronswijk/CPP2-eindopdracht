@@ -25,7 +25,7 @@ bool OptionState::handle(server::input::Command cmd) {
                 }
             }
         }catch(...) {
-            BaseState::handle(cmd);
+            return BaseState::handle(cmd);
         }
     }
     return false;
